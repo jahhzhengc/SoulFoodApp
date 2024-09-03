@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ManagerUIOnly: View {
+    @State private var manager : Bool = true
     var body: some View {
         VStack{
             Button(action: printCookies){
@@ -22,18 +23,23 @@ struct ManagerUIOnly: View {
             Button(action:logOut){
                 Label("Log out", systemImage: "rectangle.portrait.and.arrow.forward.fill")
             }
+            Toggle(isOn: $manager){
+                Text( "Log in as " + (self.manager ? "Manager" : "Customer"))
+            }
         }
     }
+    
     func logIn(){
         guard let url = URL(string: "http://127.0.0.1:8000/api/login/") else { return }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
   
-        let json: [String: String] = ["username": "manager",
-                                   "password" : "manage.rial1257"]
-
+        let json: [String: String] = self.manager ?
+            ["username": "manager", "password" : "manage.rial1257"]:
+            ["username": "test2", "password" : "vveegeer32"]
+        
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
         
@@ -44,18 +50,17 @@ struct ManagerUIOnly: View {
             httpResponse.statusCode == 200 else {
                 return
             }
-            print(response!)
+//            print(response!)
             if let data = data {
                 // Here you might want to parse the response, but usually,
                 // successful login just means handling the cookies
                 DispatchQueue.main.async {
-                    print("Logged In")
+                    print("Login as \(self.manager ? "Manager" : "Customer" )")
                 }
                 printCookies()
             }
         }.resume()
-        
-    }
+    } 
     func printCookies(){
         if let cookies = HTTPCookieStorage.shared.cookies {
             for cookie in cookies {
