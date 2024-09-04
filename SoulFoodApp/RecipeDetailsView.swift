@@ -12,6 +12,7 @@ struct RecipeDetailsView: View {
     @State private var root: String = "http://127.0.0.1:8000"
     @State private var num : Int = 0
     var body: some View {
+        
         VStack{
             AsyncImage(url: URL(string: root + recipeDetails.media_file)) { image in
                 image
@@ -21,7 +22,7 @@ struct RecipeDetailsView: View {
                         maxWidth: .infinity,
                         minHeight: 0,
                         maxHeight: .infinity)
-                    .aspectRatio(1, contentMode: .fit)
+                    .aspectRatio(1, contentMode: .fill)
             } placeholder: {
                 ProgressView()
             }
@@ -31,7 +32,7 @@ struct RecipeDetailsView: View {
             }
             .padding(1)
             
-            HStack{
+            HStack (alignment: .top){
                 Text(recipeDetails.name)
                     .font(.headline)
                     .fontWeight(.bold)
@@ -45,45 +46,61 @@ struct RecipeDetailsView: View {
                 .fontWeight(.ultraLight)
                 .padding()
             
-            ZStack{
-                RoundedRectangle(cornerSize: CGSize(width: 40, height: 40))
-                    .fill(.mint)
-                    .frame(width:80, height: 40)
-                
-                HStack{
-                    
-                    Button{
-                        if(self.num > 0){
-                            self.num -= 1
-                        }
-                    } label:{
-                        Image(systemName: "minus.circle.fill")
+            HStack(alignment: .center){
+                Button{
+                    if(self.num > 0){
+                        self.num -= 1
                     }
-                    Text(String(self.num))
-                        .foregroundStyle(.white)
-                    Button{
-                        if(self.num < 50){
-                            self.num += 1
-                        }
-                    } label:{
-                        Image(systemName: "plus.circle.fill")
-                    }
+                } label:{
+                    Image(systemName: "minus.circle.fill")
                 }
+                Text(String(self.num))
+                    .fontWeight(.black)
+                Button{
+                    if(self.num < 20){
+                        self.num += 1
+                    }
+                } label:{
+                    Image(systemName: "plus.circle.fill")
+                }
+            }
+            .foregroundStyle(.white)
+            .padding()
+            .background(.blue)
+            .clipShape(RoundedRectangle(cornerRadius: 40))
+            .overlay{
+                RoundedRectangle(cornerRadius: 40).stroke(.gray, lineWidth: 0)
+                
             }
             
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    // Action for the button
-                    print("Trailing button tapped")
-                }) {
-                    Text("Done")
-                }
+            Spacer()
+            
+            Button{
+                print("Button tapped")
+            }label:{
+                Label("Add To Cart", systemImage:  "cart.fill")
+                    .foregroundStyle(.white)
             }
+            .padding()
+            .background(.blue)
+            .clipShape(RoundedRectangle(cornerRadius: 25))
+            .overlay{
+                RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)
+            }
+            
+            
         }
+        .frame(alignment: .top)
+        //            .edgesIgnoringSafeArea(.top)
+        //            .ignoresSafeArea(.all)
+        //            Button{
+        //                dismiss()
+        //            }label:{
+        //                Image(systemName: "xmark.circle.fill")
+        //                    .frame(width: 200, height: 200)
+        //                    .padding()
+        //            }
         
-   
         
     }
 }

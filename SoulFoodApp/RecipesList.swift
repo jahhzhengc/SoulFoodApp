@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecipesList: View {
-    @State private var recipes = [Recipe]() 
+    @State private var recipes = [Recipe]()
     @State private var root: String = "http://127.0.0.1:8000"
     @State private var url = "/api/recipes"
     @State private var loaded : Bool = false
@@ -10,8 +10,9 @@ struct RecipesList: View {
     @State private var searchQuery: String = ""
     
     @State private var cart = [Recipe]()
+
     var body: some View {
-        NavigationStack{
+        NavigationView{
             VStack {
                 List(searchedRecipes, id: \.id) { recipe in
                     NavigationLink{
@@ -71,9 +72,20 @@ struct Recipe: Codable {
     var price: Double
     var availability: Bool
     var media_file: String
-    
+    var category: Category
+    var options : [Option]
     enum CodingKeys: String, CodingKey {
-        case id, name, desc, price, availability, media_file
+        case id, name, desc, price, availability, media_file, category, options
+    }
+    init(){
+        self.availability = true
+        self.name = ""
+        self.desc = ""
+        self.id = -1
+        self.media_file = ""
+        self.price = 0
+        self.category = Category()
+        self.options = []
     }
     init(name: String, desc: String, media_file:String, price:Double){
         self.availability = true
@@ -82,6 +94,8 @@ struct Recipe: Codable {
         self.desc = desc
         self.media_file = media_file
         self.id = -1
+        self.category = Category()
+        self.options = []
     }
     
     init(id: Int, name: String, desc: String, price: Double, media_file: String, availability: Bool){
@@ -91,6 +105,8 @@ struct Recipe: Codable {
         self.price = price
         self.media_file = media_file
         self.availability = availability
+        self.category = Category()
+        self.options = []
     }
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -101,6 +117,9 @@ struct Recipe: Codable {
         price = Double(priceString) ?? 0.0
         availability = try container.decode(Bool.self, forKey: .availability)
         media_file = try container.decode(String.self, forKey: .media_file)
+        category = try container.decode(Category.self, forKey: .category)
+        options = try container.decode([Option].self, forKey: .options)
+        print(options)
     }
     func parsedPrice()->String{
         return "$ " + String(format: "%.2f", self.price)
@@ -108,22 +127,42 @@ struct Recipe: Codable {
 }
 
 struct Category: Codable {
-//    name = models.CharField(max_length = 100)
-//     display_order_web = models.IntegerField(default=0)  # Order for web display
-//     display_order_mobile = models.IntegerField(default=0)  # Order for mobile display
+    var name: String
+    var display_order_mobile : Int 
     
+    init(){
+        self.name = ""
+        self.display_order_mobile = 0
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case  name, display_order_mobile
+    }
+    init(from decoder:Decoder) throws{
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        display_order_mobile = try container.decode(Int.self, forKey: .display_order_mobile)
+    }
 }
 
 struct Option: Codable{
     var name: String
-    var price_adjustment: Decimal
-//    class MenuItemOptions(models.Model):
-//    name = models.CharField(max_length=100)
-//    price_adjustment = models.DecimalField(decimal_places=2, max_digits=7, default = 0.00)# can be null
-//    
-//    def __str__(self):
-//    return f"{self.name} ({'+' if self.price_adjustment >= 0 else ''}{self.price_adjustment})"
+    var price_adjustment: Double
     
+    init(){
+        self.name = ""
+        self.price_adjustment = 0.0
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case  name, price_adjustment
+    }
+    init(from decoder:Decoder) throws{
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        let priceString = try container.decode(String.self, forKey: .price_adjustment)
+        price_adjustment = Double(priceString) ?? 0.0
+    }
 }
 
 struct AddOn: Codable{
@@ -135,7 +174,7 @@ struct AddOn: Codable{
 }
 #Preview {
     RecipesList()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Item.self, inMemory: true) 
 }
       
 //"category": 6,
