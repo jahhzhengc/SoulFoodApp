@@ -1,80 +1,41 @@
 import SwiftUI
 
 struct RecipesList: View {
-    @State private var recipes = [Recipe]()
-    @State private var filteredRecipes : [Recipe] = []
+    @State private var recipes = [Recipe]() 
     @State private var root: String = "http://127.0.0.1:8000"
     @State private var url = "/api/recipes"
     @State private var loaded : Bool = false
     
     @State private var isShowingSheet = false
     @State private var searchQuery: String = ""
+    
+    @State private var cart = [Recipe]()
     var body: some View {
-        //        NavigationSplitView{
-        
         NavigationStack{
-            LabeledContent {
-                TextField("Search for recipes", text: $searchQuery)
-                    // i prefer a 'after finish typing for .5s' type of onChange instead of these instant kind
-                    // but idk if SwiftUI has it
-                    .onChange(of: searchQuery){ oldValue, newValue in
-                        let _filteredRecipes = recipes.filter { recipe in
-                            return recipe.name.contains(searchQuery)
-                        }
-                        filteredRecipes = _filteredRecipes
-                    }
-                    .padding(5)
-                    .padding(.horizontal,5)
-                    .background(.gray.opacity(0.14))
-                    .cornerRadius(2)
-                    .overlay(
-                        HStack{
-                            Spacer()
-                            if !searchQuery.isEmpty {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.secondary)
-                                    .onTapGesture {
-                                        searchQuery = ""
-                                    }
-                                    .padding(.trailing, 8)
-                            }
-                        }
-                        )
-            } label: {
-                Image(systemName: "magnifyingglass")
-            }
-            .padding()
-             
             VStack {
-                if(searchQuery.isEmpty){
-                    List(recipes, id: \.id) { recipe in
-                        NavigationLink{
-                            RecipeDetailsView(recipeDetails: recipe)
-                        }label:{
-                            RecipeView(recipeDetails: recipe)
-                        }
+                List(searchedRecipes, id: \.id) { recipe in
+                    NavigationLink{
+                        RecipeDetailsView(recipeDetails: recipe)
+                    }label:{
+                        RecipeView(recipeDetails: recipe)
                     }
-                    .navigationTitle("Menu")
-                    .navigationBarTitleDisplayMode(.automatic)
                 }
-                else{
-                    List(filteredRecipes, id: \.id) { recipe in
-                        NavigationLink{
-                            RecipeDetailsView(recipeDetails: recipe)
-                        }label:{
-                            RecipeView(recipeDetails: recipe)
-                        }
-                    }
-                    .navigationTitle("Search result")
-                    .navigationBarTitleDisplayMode(.automatic)
-                }
+                .navigationTitle("Menu")
+                .navigationBarTitleDisplayMode(.automatic)
             }
-            //            .navgationDestination(for: recipe)
+            .searchable(text: $searchQuery, prompt: "Search for recipes")
+            Spacer()
         }
         .onAppear(perform: loadRecipes)
-        
-        
     }
+    
+    var searchedRecipes:[Recipe] {
+        if searchQuery.isEmpty{
+            return recipes
+        }
+        return recipes.filter {$0.name.contains(searchQuery)}
+    }
+    
     func didDismiss(){
         
     }
