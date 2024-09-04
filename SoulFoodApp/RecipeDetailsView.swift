@@ -90,6 +90,8 @@ struct RecipeDetailsView: View {
             
             
         }
+        .navigationTitle(recipeDetails.name)
+        .navigationBarTitleDisplayMode(.inline)
         .frame(alignment: .top)
         //            .edgesIgnoringSafeArea(.top)
         //            .ignoresSafeArea(.all)

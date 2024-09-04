@@ -12,20 +12,17 @@ struct RecipesList: View {
     @State private var cart = [Recipe]()
 
     var body: some View {
-        NavigationView{
-            VStack {
-                List(searchedRecipes, id: \.id) { recipe in
-                    NavigationLink{
-                        RecipeDetailsView(recipeDetails: recipe)
-                    }label:{
-                        RecipeView(recipeDetails: recipe)
-                    }
+        NavigationStack {
+            List(searchedRecipes, id: \.id) { recipe in
+                NavigationLink{
+                    RecipeDetailsView(recipeDetails: recipe)
+                }label:{
+                    RecipeView(recipeDetails: recipe)
                 }
-                .navigationTitle("Menu")
-                .navigationBarTitleDisplayMode(.automatic)
             }
+            .navigationTitle("Menu")
+            .navigationBarTitleDisplayMode(.automatic)
             .searchable(text: $searchQuery, prompt: "Search for recipes")
-            Spacer()
         }
         .onAppear(perform: loadRecipes)
     }
@@ -62,6 +59,7 @@ struct RecipesList: View {
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
+        self.recipes.append(Recipe(name: "Apple Pie", desc: "Description of apple pie", media_file: "", price: 100.00))
     }
 }
 
