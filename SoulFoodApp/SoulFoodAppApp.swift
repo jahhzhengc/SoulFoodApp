@@ -25,7 +25,7 @@ struct SoulFoodAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RecipesList()
         }
         .modelContainer(sharedModelContainer)
     }
