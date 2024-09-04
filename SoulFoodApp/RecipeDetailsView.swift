@@ -74,7 +74,7 @@ struct RecipeDetailsView: View {
                 .padding()
                 .overlay{
                     RoundedRectangle(cornerRadius: 25).stroke(.gray, lineWidth: 1)
-                }
+                } 
                 .padding()
             }
             
@@ -103,10 +103,7 @@ struct RecipeDetailsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 40))
             .overlay{
                 RoundedRectangle(cornerRadius: 40).stroke(.gray, lineWidth: 0)
-                
             }
-            
-//            Spacer()
             
             if(num > 0){
                 Button{
@@ -114,7 +111,7 @@ struct RecipeDetailsView: View {
                     print(cart.$items)
                     dismiss()
                 }label:{
-                    Label("Add To Cart", systemImage:  "cart.fill")
+                    Label("Add To Cart - \(recipeDetails.parsedPrice (toParse: recipeDetails.allPriceConsidered * Double(num)))", systemImage:  "cart.fill")
                         .foregroundStyle(.white)
                 }
                 
@@ -131,6 +128,8 @@ struct RecipeDetailsView: View {
         .navigationTitle(recipeDetails.name)
         .navigationBarTitleDisplayMode(.inline)
     }
+    
+    
 }
 
 #Preview {

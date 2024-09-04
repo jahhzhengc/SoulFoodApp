@@ -119,6 +119,22 @@ struct Recipe: Codable, Identifiable {
     func parsedPrice()->String{
         return "$ " + String(format: "%.2f", self.price)
     }
+    func parsedPrice(toParse: Double)->String{
+        return "$ " + String(format: "%.2f", toParse)
+    }
+    var allPriceConsidered: Double{
+        let _options  = options.filter { option in
+            return option.toggled
+        }
+        var toReturn: Double = price
+         
+        for x in 0..<_options.count{
+            toReturn += options[x].price_adjustment
+        }
+        
+        return toReturn
+        
+    }
 }
 
 struct Category: Codable, Identifiable {
