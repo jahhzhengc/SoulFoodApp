@@ -65,8 +65,7 @@ struct RecipeView: View {
 }
 
 #Preview {
-    RecipeView(recipeDetails: Recipe(id: 2, name: "Mini Pumpkin Chocolate Chip Muffins",
-                                     desc: "Mini Pumpkin Chocolate Chip Muffins made lighter by swapping out butter for pumpkin puree loaded with chocolate chips in every bite!", price: 2.2,
-                                     media_file: "/static/img/menu_items/77.jpg", availability: true))
-        
+    RecipeView(recipeDetails: Recipe( name: "Mini Pumpkin Chocolate Chip Muffins",
+                                     desc: "Mini Pumpkin Chocolate Chip Muffins made lighter by swapping out butter for pumpkin puree loaded with chocolate chips in every bite!",
+                                     media_file: "/static/img/menu_items/77.jpg", price: 2.2))
 }

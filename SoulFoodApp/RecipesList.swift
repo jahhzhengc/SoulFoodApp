@@ -8,14 +8,15 @@ struct RecipesList: View {
     
     @State private var isShowingSheet = false
     @State private var searchQuery: String = ""
-    
-    @State private var cart = [Recipe]()
+     
+    @StateObject private var cart = Cart()
+    @State private var categories = [Category] ()
 
     var body: some View {
         NavigationStack {
             List(searchedRecipes, id: \.id) { recipe in
                 NavigationLink{
-                    RecipeDetailsView(recipeDetails: recipe)
+                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
                 }label:{
                     RecipeView(recipeDetails: recipe)
                 }
@@ -34,10 +35,6 @@ struct RecipesList: View {
         return recipes.filter {$0.name.contains(searchQuery)}
     }
     
-    func didDismiss(){
-        
-    }
-    
     func loadRecipes() {
         guard let url = URL(string: root + url) else {
             print("Invalid URL")
@@ -50,7 +47,7 @@ struct RecipesList: View {
                   let decodedResponse = try JSONDecoder().decode([Recipe].self, from: data)
                   DispatchQueue.main.async {
                       self.recipes = decodedResponse
-                      self.loaded = true
+                      self.loaded = true 
                   }
               } catch {
                   print("Failed to decode JSON: \(error.localizedDescription)")
@@ -59,11 +56,10 @@ struct RecipesList: View {
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
-        self.recipes.append(Recipe(name: "Apple Pie", desc: "Description of apple pie", media_file: "", price: 100.00))
     }
 }
 
-struct Recipe: Codable {
+struct Recipe: Codable, Identifiable {
     var id: Int
     var name: String
     var desc: String
@@ -96,7 +92,7 @@ struct Recipe: Codable {
         self.options = []
     }
     
-    init(id: Int, name: String, desc: String, price: Double, media_file: String, availability: Bool){
+    init(id: Int, name: String, desc: String, price: Double, media_file: String, availability: Bool, options: [Option]){
         self.id = id
         self.name = name
         self.desc = desc
@@ -104,7 +100,7 @@ struct Recipe: Codable {
         self.media_file = media_file
         self.availability = availability
         self.category = Category()
-        self.options = []
+        self.options = options
     }
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -117,49 +113,72 @@ struct Recipe: Codable {
         media_file = try container.decode(String.self, forKey: .media_file)
         category = try container.decode(Category.self, forKey: .category)
         options = try container.decode([Option].self, forKey: .options)
-        print(options)
+        
+//        print("Options", options)
     }
     func parsedPrice()->String{
         return "$ " + String(format: "%.2f", self.price)
     }
 }
 
-struct Category: Codable {
+struct Category: Codable, Identifiable {
+    var id: Int
     var name: String
     var display_order_mobile : Int 
     
     init(){
+        self.id = 0
         self.name = ""
         self.display_order_mobile = 0
     }
     
     enum CodingKeys: String, CodingKey {
-        case  name, display_order_mobile
+        case id, name, display_order_mobile
     }
     init(from decoder:Decoder) throws{
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(Int.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         display_order_mobile = try container.decode(Int.self, forKey: .display_order_mobile)
     }
 }
 
-struct Option: Codable{
+struct Option: Codable, Identifiable{
+    var id: Int
     var name: String
     var price_adjustment: Double
-    
+    var toggled: Bool = false
     init(){
         self.name = ""
+        self.id = 0
         self.price_adjustment = 0.0
+        self.toggled = false
     }
-    
+    init(id: Int, name:String, price_adjustment:Double){
+        self.name = name
+        self.id = id
+        self.price_adjustment = price_adjustment
+        self.toggled = false
+    }
     enum CodingKeys: String, CodingKey {
-        case  name, price_adjustment
+        case  id, name, price_adjustment
     }
     init(from decoder:Decoder) throws{
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
+        id = try container.decode(Int.self, forKey: .id)
+
         let priceString = try container.decode(String.self, forKey: .price_adjustment)
         price_adjustment = Double(priceString) ?? 0.0
+    }
+    var getPriceAdjustment: String{
+        if(self.price_adjustment == 0){
+            return ""
+        }
+        let positive = self.price_adjustment > 0
+        let toReturn = (positive ? "+" : "-" ) + " $ " + String(self.price_adjustment);
+        
+        return toReturn
     }
 }
 

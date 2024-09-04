@@ -8,21 +8,27 @@
 import SwiftUI
 
 struct RecipeDetailsView: View {
-    var recipeDetails : Recipe
+    @State var recipeDetails : Recipe
     @State private var root: String = "http://127.0.0.1:8000"
     @State private var num : Int = 0
+    @Environment(\.dismiss) private var dismiss
+
+    @ObservedObject var cart: Cart  // Reference the shared cart
+    
+    @State private var isOn : Bool = false
     var body: some View {
-        
-        VStack{
+         
+        ScrollView(.vertical, showsIndicators: false){
             AsyncImage(url: URL(string: root + recipeDetails.media_file)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(
-                        maxWidth: .infinity,
-                        minHeight: 0,
-                        maxHeight: .infinity)
-                    .aspectRatio(1, contentMode: .fill)
+                    .frame(minWidth: 0,
+                      maxWidth: .infinity,
+                      minHeight: 0,
+                      maxHeight: .infinity)
+                    .clipped()
+                    .aspectRatio(1, contentMode: .fit)
             } placeholder: {
                 ProgressView()
             }
@@ -46,6 +52,33 @@ struct RecipeDetailsView: View {
                 .fontWeight(.ultraLight)
                 .padding()
             
+            if(recipeDetails.options.count > 0){
+                VStack (alignment: .leading){
+                    Text("Add Ons    .")
+                        .font(.title2)
+                        .fontWeight(.heavy)
+                        .underline()
+                    ForEach(recipeDetails.options.indices, id:\.self) { index in
+                        HStack{
+                            Image(systemName: recipeDetails.options[index].toggled ? "checkmark.circle.fill" : "circle")
+                                .onTapGesture {
+                                    recipeDetails.options[index].toggled.toggle()
+                                }
+                            Text(recipeDetails.options[index].name)
+                            Spacer()
+                            Text(recipeDetails.options[index].getPriceAdjustment)
+                        }
+                        
+                    }
+                }
+                .padding()
+                .overlay{
+                    RoundedRectangle(cornerRadius: 25).stroke(.gray, lineWidth: 1)
+                }
+                .padding()
+            }
+            
+            // - 1 + UI
             HStack(alignment: .center){
                 Button{
                     if(self.num > 0){
@@ -73,43 +106,41 @@ struct RecipeDetailsView: View {
                 
             }
             
-            Spacer()
+//            Spacer()
             
-            Button{
-                print("Button tapped")
-            }label:{
-                Label("Add To Cart", systemImage:  "cart.fill")
-                    .foregroundStyle(.white)
-            }
-            .padding()
-            .background(.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 25))
-            .overlay{
-                RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)
+            if(num > 0){
+                Button{
+                    cart.add(recipe: recipeDetails)
+                    print(cart.$items)
+                    dismiss()
+                }label:{
+                    Label("Add To Cart", systemImage:  "cart.fill")
+                        .foregroundStyle(.white)
+                }
+                
+                .padding()
+                .background(.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 25))
+                .overlay{
+                    RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)
+                }
             }
             
             
         }
         .navigationTitle(recipeDetails.name)
         .navigationBarTitleDisplayMode(.inline)
-        .frame(alignment: .top)
-        //            .edgesIgnoringSafeArea(.top)
-        //            .ignoresSafeArea(.all)
-        //            Button{
-        //                dismiss()
-        //            }label:{
-        //                Image(systemName: "xmark.circle.fill")
-        //                    .frame(width: 200, height: 200)
-        //                    .padding()
-        //            }
-        
-        
     }
 }
 
 #Preview {
     RecipeDetailsView(recipeDetails: Recipe(id: 2, name: "Mini Pumpkin Chocolate Chip Muffins",
                                      desc: "Mini Pumpkin Chocolate Chip Muffins made lighter by swapping out butter for pumpkin puree loaded with chocolate chips in every bite!", price: 2.2,
-                                     media_file: "/static/img/menu_items/77.jpg", availability: true))
+                                            media_file: "/static/img/menu_items/77.jpg", availability: true,
+                                            
+                                            options: [Option(id: 0, name: "Extra Pasta", price_adjustment: 2.0),
+                                                      Option(id: 1, name: "Extra Soup", price_adjustment: 2.0)]
+
+                                           ), cart: Cart())
         
 }
