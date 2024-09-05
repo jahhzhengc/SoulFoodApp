@@ -17,6 +17,8 @@ struct RecipesList: View {
             List(searchedRecipes, id: \.id) { recipe in
                 NavigationLink{
                     RecipeDetailsView(recipeDetails: recipe, cart: cart)
+                        .navigationTitle(recipe.name)
+                        .navigationBarTitleDisplayMode(.inline)
                 }label:{
                     RecipeView(recipeDetails: recipe)
                 }
@@ -24,6 +26,17 @@ struct RecipesList: View {
             .navigationTitle("Menu")
             .navigationBarTitleDisplayMode(.automatic)
             .searchable(text: $searchQuery, prompt: "Search for recipes")
+            .toolbar {
+                if(cart.items.count > 0){
+                    ToolbarItem(placement: .topBarTrailing){
+                        NavigationLink{
+                            CartDisplay(cart: cart)
+                        }label:{
+                            Label("Cart", systemImage: "cart.fill")
+                        }
+                    }
+                }
+            }
         }
         .onAppear(perform: loadRecipes)
     }
