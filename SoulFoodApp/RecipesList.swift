@@ -26,19 +26,45 @@ struct RecipesList: View {
             .navigationTitle("Menu")
             .navigationBarTitleDisplayMode(.automatic)
             .searchable(text: $searchQuery, prompt: "Search for recipes")
-            .toolbar {
-                if(cart.items.count > 0){
-                    ToolbarItem(placement: .topBarTrailing){
-                        NavigationLink{
-                            CartDisplay(cart: cart)
-                        }label:{
-                            Label("Cart", systemImage: "cart.fill")
-                        }
-                    }
-                }
+            .overlay(alignment: .bottomTrailing){
+                
+                NavigationLink{
+                    CartDisplay(cart: cart)
+                }label:{
+                    btmRightBtn
+                } 
+                .navigationTitle("Cart")
+                .navigationBarTitleDisplayMode(.inline)
+                .padding()
+                .disabled( cart.items.count < 1)
             }
+             
         }
+     
         .onAppear(perform: loadRecipes)
+    }
+    
+    var btmRightBtn: some View{
+        ZStack {
+            Circle()
+                .fill(.blue.gradient)
+                .frame(width: 80, height: 80)
+                .overlay(
+                    Circle().stroke(.gray.gradient, lineWidth: 1)
+                )
+                .shadow(color: .blue, radius: 4)
+
+            Image(systemName: "cart.badge.plus")
+                .resizable()
+                .scaledToFit() // Ensures the image fits within its container
+                .frame(width: 40, height: 40) // Adjust the size of the image itself
+                .foregroundStyle(.white)
+        }
+        .frame(width: 80, height: 80)
+        .opacity(cart.items.count < 1 ? 0.0 : 1.0)
+        .animation(.easeInOut(duration: 0.6), value: cart.items.count < 1)
+
+
     }
     
     var searchedRecipes:[Recipe] {
