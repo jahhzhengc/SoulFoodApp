@@ -9,8 +9,13 @@ import SwiftUI
 
 struct ManagerUIOnly: View {
     @State private var manager : Bool = true
+    let authTokenString = "auth_token"
+    
+    @AppStorage("auth_token") private var token : String = ""
     var body: some View {
         VStack{
+//            let text = UserDefaults.standard.string(forKey: authTokenString) ?? "Not logged in"
+            Text(token)
             Button(action: printCookies){
                 Label("Print Cookies", systemImage: "list.bullet.indent")
             }
@@ -29,8 +34,9 @@ struct ManagerUIOnly: View {
         }
     }
     
+    let loginURL = "http://127.0.0.1:8000/auth/token/login/"
     func logIn(){
-        guard let url = URL(string: "http://127.0.0.1:8000/api/login/") else { return }
+        guard let url = URL(string: loginURL) else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -50,17 +56,32 @@ struct ManagerUIOnly: View {
             httpResponse.statusCode == 200 else {
                 return
             }
-//            print(response!)
             if let data = data {
-                // Here you might want to parse the response, but usually,
-                // successful login just means handling the cookies
+                
+                print("Login as \(self.manager ? "Manager" : "Customer" )")
+                
+              
                 DispatchQueue.main.async {
-                    print("Login as \(self.manager ? "Manager" : "Customer" )")
+                    
+                    do {
+                        let json = try JSONDecoder().decode(Token.self, from: data)
+                        TokenManager.shared.saveToken(json.auth_token)
+                        print("HERE" ,json.auth_token!)
+                    } catch {
+                        print("didnt work")
+                    }
+
+                    // Retrieving the token
+                    if let token = TokenManager.shared.getToken() {
+                        print("Token retrieved: \(token)")
+                    } else {
+                        print("No token found")
+                    }
                 }
                 printCookies()
             }
         }.resume()
-    } 
+    }
     func printCookies(){
         if let cookies = HTTPCookieStorage.shared.cookies {
             for cookie in cookies {
@@ -69,36 +90,46 @@ struct ManagerUIOnly: View {
         }
     }
     func logOut(){
-        guard let url = URL(string: "http://127.0.0.1:8000/api/logout/") else {
-            print("Invalid URL")
-            return
-        }
-        let request = URLRequest(url: url)
+//        guard let url = URL(string: "http://127.0.0.1:8000/api/logout/") else {
+//            print("Invalid URL")
+//            return
+//        }
+//        var request = URLRequest(url: url)
+        let url = "http://127.0.0.1:8000/auth/token/logout/"
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        request.httpMethod = "POST"
+//
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
-                print(data)
-                print(response!)
-                  
+                TokenManager.shared.removeToken()
             }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+//            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
     }
-    
+     
     // accessing a API that requires authentication.
     // no need for explicit setting session id
     func load() {
-        guard let url = URL(string: "http://127.0.0.1:8000/api/manager") else {
-            print("Invalid URL")
-            return
-        }
-        let request = URLRequest(url: url)
+        
+//        guard let url = URL(string: "http://127.0.0.1:8000/api/manager/") else {
+//            print("Invalid URL")
+//            return
+//        }
+        let url = "http://127.0.0.1:8000/api/manager/"
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        request.httpMethod = "GET"
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                print(data)
-                print(response!)
-                  
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "No data")
+                return
             }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+            if let responseJSON = responseJSON as? [String: String] {
+                print(responseJSON.keys)
+                print(responseJSON.values)
+            }
+//            print(data)
         }.resume()
     }
 }
