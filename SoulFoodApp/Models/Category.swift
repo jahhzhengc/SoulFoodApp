@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Category: Codable, Identifiable {
+struct Category: Codable, Identifiable, Hashable{
     var id: Int
     var name: String
     var display_order_mobile : Int
@@ -25,6 +25,6 @@ struct Category: Codable, Identifiable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
-        display_order_mobile = try container.decode(Int.self, forKey: .display_order_mobile)
+        display_order_mobile = try container.decode(Int.self, forKey: .display_order_mobile) 
     }
 }

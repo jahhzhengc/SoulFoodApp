@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct OrderItemView: View {
-    @State var orderItem: OrderItem
+//    @State var orderItem: OrderItem
+//    @ObservedObject 
+    var orderItem : OrderItem
     var body: some View {
         HStack (alignment: .top){
             Text(String(orderItem.quantity) + "x")
@@ -21,9 +23,10 @@ struct OrderItemView: View {
                     if(option.toggled){
                         Text(option.name)
                     }
-                } 
+                }
             }
             Spacer()
+            
             Text(orderItem.getTotalPrice)
         }
         .padding()
@@ -31,13 +34,12 @@ struct OrderItemView: View {
         .overlay{
             RoundedRectangle(cornerRadius: 10).stroke(.gray, lineWidth: 1)
         }
-        .padding()
         
     }
 }
 
 #Preview {
-    var orderItem = OrderItem(recipe: Recipe(id: 2, name: "Mini Pumpkin Chocolate Chip Muffins",
+    let orderItem = OrderItem(recipe: Recipe(id: 2, name: "Mini Pumpkin Chocolate Chip Muffins",
 desc: "Mini Pumpkin Chocolate Chip Muffins made lighter by swapping out butter for pumpkin puree loaded with chocolate chips in every bite!", price: 20.2, media_file: "/static/img/menu_items/77.jpg", availability: true,
 options: [Option(id: 0, name: "Extra Pasta", price_adjustment: 2.0, toggled: true),
           Option(id: 1, name: "Extra Soup", price_adjustment: 2.0)]), quantity: 2)

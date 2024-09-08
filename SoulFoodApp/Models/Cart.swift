@@ -22,9 +22,18 @@ class Cart: ObservableObject{
         if(items.count == 0) {
             return "$ 0.00"
         }
-        var totalPrice = items.map{ $0.totalPrice}.reduce(0, +)
+        let totalPrice = items.map{ $0.totalPrice}.reduce(0, +)
         
         return items[0].recipe.parsedPrice(toParse: totalPrice)
+    }
+    func updateOrderItem (uuid: UUID, orderItem: OrderItem){
+        if let index = items.firstIndex(where: {$0.id == uuid}){
+            print("update: \(uuid)")
+            items[index].recipe = orderItem.recipe
+            items[index].quantity = orderItem.quantity
+            objectWillChange.send()
+            print(items[index])
+        }
     }
 }
 

@@ -10,7 +10,6 @@ import SwiftUI
 struct RecipeView: View {
     var recipeDetails: Recipe
     @State private var root: String = "http://127.0.0.1:8000"
-    @State private var isSet: Bool = false
     var body: some View {
         ZStack(alignment: .bottomTrailing){
             HStack(alignment:.top){
@@ -40,8 +39,6 @@ struct RecipeView: View {
                         .frame(alignment: .topLeading)
                         .fontWeight(.medium) 
                         .lineLimit(2)
-//                    Text(recipeDetails.media_file)
-//                    Text(summarise(text: recipeDetails.desc, limit: 10))
                     Text(recipeDetails.desc)
                         .lineLimit(2)
                         .fontWeight(.light)
@@ -55,13 +52,7 @@ struct RecipeView: View {
             }
             Spacer()
         }
-    }
-    
-    func summarise(text: String, limit: Int)-> String{
-        let descriptions = text.split(separator: " ")
-        let limitedWords = descriptions.prefix(limit)
-        return limitedWords.joined(separator: " ") + "..."
-    }
+    } 
 }
 
 #Preview {

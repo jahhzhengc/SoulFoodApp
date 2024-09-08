@@ -7,7 +7,7 @@
 
 import Foundation
 
-class OrderItem :Codable, Identifiable{
+class OrderItem :Codable, Identifiable, ObservableObject, Equatable{
     var recipe: Recipe
     var quantity : Int
     var id = UUID()
@@ -26,5 +26,9 @@ class OrderItem :Codable, Identifiable{
     
     var getTotalPrice: String{
         return recipe.allPriceConsideredString(quantity: quantity)
+    }
+    
+    static func ==(lhs:OrderItem,rhs:OrderItem) ->Bool{
+        return lhs.id == rhs.id
     }
 }

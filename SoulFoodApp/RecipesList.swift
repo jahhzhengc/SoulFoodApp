@@ -10,29 +10,74 @@ struct RecipesList: View {
     @State private var searchQuery: String = ""
      
     @StateObject private var cart = Cart()
+    
     @State private var categories = [Category] ()
 
+//    var groupedRecipes: [String: String] = []
+    
     var body: some View {
+        let groupedRecipes = Dictionary(grouping: recipes, by: { $0.category })
+
+               
         NavigationStack {
-            List(searchedRecipes, id: \.id) { recipe in
-                NavigationLink{
-                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
-                        .navigationTitle(recipe.name)
-                        .navigationBarTitleDisplayMode(.inline)
-                }label:{
-                    RecipeView(recipeDetails: recipe)
+//            List(searchedRecipes, id: \.id) { recipe in
+//                NavigationLink{
+//                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
+//                        .navigationTitle(recipe.name)
+//                        .navigationBarTitleDisplayMode(.inline)
+//                }label:{
+//                    RecipeView(recipeDetails: recipe)
+//                }
+//            } 
+            
+            List{
+                ForEach(categories, id: \.self){ category in
+                    Section(header: Text(category.name).font(.headline)) {
+//                    DisclosureGroup(
+                        ForEach(groupedRecipes[category] ?? []) { recipe in
+                            NavigationLink{
+                               RecipeDetailsView(recipeDetails: recipe, cart: cart)
+                                   .navigationTitle(recipe.name)
+                                   .navigationBarTitleDisplayMode(.inline)
+                           }label:{
+                               RecipeView(recipeDetails: recipe)
+                           }
+                        }
+                    }
+//                    .isExpand
                 }
             }
+            .listStyle(PlainListStyle())
+                
+//            .listStyle(InsetListStyle())
+//            List{
+//                ForEach(groupedRecipes.keys.sorted(by: { $0.name < $1.name }), id: \.self) { category in
+//                    Section(header: Text(category.name).font(.headline).padding()) {
+//                        // Step 3: Display the recipes for each category
+//                        ForEach(groupedRecipes[category] ?? []) { recipe in
+//                            NavigationLink{
+//                                RecipeDetailsView(recipeDetails: recipe, cart: cart)
+//                                    .navigationTitle(recipe.name)
+//                                    .navigationBarTitleDisplayMode(.inline)
+//                            }label:{
+//                                RecipeView(recipeDetails: recipe)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             .navigationTitle("Menu")
             .navigationBarTitleDisplayMode(.automatic)
+            
+//            .listStyle(SidebarListStyle())
             .searchable(text: $searchQuery, prompt: "Search for recipes")
             .overlay(alignment: .bottomTrailing){
                 
                 NavigationLink{
                     CartDisplay(cart: cart)
                 }label:{
-                    btmRightBtn
-                } 
+                    cartBtn
+                }
                 .navigationTitle("Cart")
                 .navigationBarTitleDisplayMode(.inline)
                 .padding()
@@ -44,7 +89,7 @@ struct RecipesList: View {
         .onAppear(perform: loadRecipes)
     }
     
-    var btmRightBtn: some View{
+    var cartBtn: some View{
         ZStack {
             Circle()
                 .fill(.blue.gradient)
@@ -73,7 +118,6 @@ struct RecipesList: View {
         }
         return recipes.filter {$0.name.contains(searchQuery)}
     }
-    
     func loadRecipes() {
         guard let url = URL(string: root + url) else {
             print("Invalid URL")
@@ -86,7 +130,12 @@ struct RecipesList: View {
                   let decodedResponse = try JSONDecoder().decode([Recipe].self, from: data)
                   DispatchQueue.main.async {
                       self.recipes = decodedResponse
-                      self.loaded = true 
+                          .sorted(by: {($0.category.display_order_mobile, $0.category.name) < ($1.category.display_order_mobile, $1.category.name) })
+                      
+                      self.categories = Array(Set(decodedResponse.map { $0.category }))
+                          .sorted(by: {  ($0.display_order_mobile, $0.name) < ($1.display_order_mobile, $1.name) })
+ 
+                      self.loaded = true
                   }
               } catch {
                   print("Failed to decode JSON: \(error.localizedDescription)")
@@ -102,11 +151,4 @@ struct RecipesList: View {
     RecipesList()
         .modelContainer(for: Item.self, inMemory: true) 
 }
-      
-//"category": 6,
-//"options": [
-//    1,
-//    2
-//],
-//"add_ons": []
-//},
+       

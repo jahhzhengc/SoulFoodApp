@@ -18,6 +18,8 @@ struct RecipeDetailsView: View {
 //    @ObservedObject var referencedRecipe: Recipe
     @State var edit: Bool = false
     @State var index: UUID = UUID()
+    
+    @State var favourited: Bool = false
      
     var body: some View {
          
@@ -35,6 +37,10 @@ struct RecipeDetailsView: View {
             } placeholder: {
                 ProgressView()
             }
+            .overlay(alignment: .topTrailing){
+                favouriteBtn
+                    .frame(alignment: .leading)
+            }
             .clipped()
             .overlay{
                 Rectangle().stroke(.gray, lineWidth: 1)
@@ -46,9 +52,10 @@ struct RecipeDetailsView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                 
+                
                 Spacer()
                 
-                  
+                
                 Text(recipeDetails.parsedPrice())
             }
             .padding()
@@ -71,6 +78,60 @@ struct RecipeDetailsView: View {
         }
     }
     
+    let width :CGFloat = 100
+    var favouriteBtn: some View{
+        ZStack{
+            RoundedRectangle(cornerRadius: 25, style: .continuous)
+                .fill(Color.blue.gradient)
+                .frame(width: width, height: width/2)
+                .offset(x: width / 2)
+                .clipped()
+                .offset(x: -width / 4)
+                .frame(width: width / 2)
+            
+            Image(systemName:(favourited ? "star.fill": "star"))
+                .resizable()
+                .aspectRatio(1, contentMode: .fit)
+                .frame(width: 30)
+                .onTapGesture {
+                    favourited.toggle()
+                }
+                .foregroundStyle(.yellow.gradient)
+            
+        }.onAppear{
+            print("http://127.0.0.1:8000/api/favourites/\(recipeDetails.id)")
+//            TokenManager.shared.
+        }
+        
+    }
+    func loadRecipeFavourite() {
+        
+        let url = root + "/api/favourites/\(recipeDetails.id)"
+//        guard let url = URL(string: root + _url) else {
+//            print("Invalid URL")
+//            return
+//        }
+        
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        request.httpMethod = "GET"
+        
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+//        URLSession.shared.dataTask(with: request) { data, response, error in
+//            if let data = data {
+//                
+//              do {
+//                  let decodedResponse = try JSONDecoder().decode([RecipeFavourite].self, from: data)
+//                  DispatchQueue.main.async{
+//                  }
+//              } catch {
+//                  print("Failed to decode JSON: \(error.localizedDescription)")
+//              }
+//              return
+//            }
+//            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+//        }.resume()
+    }
     
     var addOnSection: some View {
         VStack (alignment: .leading){
@@ -128,21 +189,20 @@ struct RecipeDetailsView: View {
     
     var addToCartBtn : some View{
         Button{
-            if !edit{
-                print("IN")
+            if !edit{ 
                 let orderItem = OrderItem(recipe: recipeDetails, quantity: num)
+                print(orderItem.id)
                 cart.add(orderItem: orderItem)
             }
             else{
+                let orderItem = OrderItem(recipe: recipeDetails, quantity: num)
                 
-                if let item = cart.items.firstIndex(where: { $0.id == index }) {
-                    cart.items[item].recipe = recipeDetails
-                    cart.items[item].quantity = num
-                }
+                cart.updateOrderItem(uuid: index, orderItem: orderItem) 
             }
             dismiss()
         }label:{
-            Label("Add To Cart - \(recipeDetails.parsedPrice (toParse: recipeDetails.allPriceConsidered * Double(num)))", systemImage:  "cart.fill")
+            let text = !edit ?  "Add To Cart - " : "Edit Cart - "
+            Label(text + (recipeDetails.parsedPrice (toParse: recipeDetails.allPriceConsidered * Double(num))), systemImage:  "cart.fill")
                 .foregroundStyle(.white)
         }
         .padding()
