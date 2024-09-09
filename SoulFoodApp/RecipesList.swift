@@ -19,7 +19,7 @@ struct RecipesList: View {
         let groupedRecipes = Dictionary(grouping: recipes, by: { $0.category })
 
                
-        NavigationStack {
+        NavigationView {
 //            List(searchedRecipes, id: \.id) { recipe in
 //                NavigationLink{
 //                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
@@ -44,35 +44,14 @@ struct RecipesList: View {
                            }
                         }
                     }
-//                    .isExpand
                 }
             }
             .listStyle(PlainListStyle())
-                
-//            .listStyle(InsetListStyle())
-//            List{
-//                ForEach(groupedRecipes.keys.sorted(by: { $0.name < $1.name }), id: \.self) { category in
-//                    Section(header: Text(category.name).font(.headline).padding()) {
-//                        // Step 3: Display the recipes for each category
-//                        ForEach(groupedRecipes[category] ?? []) { recipe in
-//                            NavigationLink{
-//                                RecipeDetailsView(recipeDetails: recipe, cart: cart)
-//                                    .navigationTitle(recipe.name)
-//                                    .navigationBarTitleDisplayMode(.inline)
-//                            }label:{
-//                                RecipeView(recipeDetails: recipe)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
             .navigationTitle("Menu")
             .navigationBarTitleDisplayMode(.automatic)
-            
 //            .listStyle(SidebarListStyle())
             .searchable(text: $searchQuery, prompt: "Search for recipes")
             .overlay(alignment: .bottomTrailing){
-                
                 NavigationLink{
                     CartDisplay(cart: cart)
                 }label:{
@@ -81,14 +60,15 @@ struct RecipesList: View {
                 .navigationTitle("Cart")
                 .navigationBarTitleDisplayMode(.inline)
                 .padding()
-                .disabled( cart.items.count < 1)
+                .disabled(cart.items.count < 1)
             }
              
         }
      
         .onAppear(perform: loadRecipes)
     }
-    
+     
+    @State private var changeColor = false
     var cartBtn: some View{
         ZStack {
             Circle()
@@ -97,19 +77,22 @@ struct RecipesList: View {
                 .overlay(
                     Circle().stroke(.gray.gradient, lineWidth: 1)
                 )
-                .shadow(color: .blue, radius: 4)
-
+                .shadow(color: .blue, radius: (changeColor ? 1 : 5))
+                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: changeColor) // Animation applied here
+                .onAppear {
+                    changeColor.toggle()
+                }
+ 
             Image(systemName: "cart.badge.plus")
                 .resizable()
                 .scaledToFit() // Ensures the image fits within its container
                 .frame(width: 40, height: 40) // Adjust the size of the image itself
                 .foregroundStyle(.white)
+                
         }
         .frame(width: 80, height: 80)
         .opacity(cart.items.count < 1 ? 0.0 : 1.0)
         .animation(.easeInOut(duration: 0.6), value: cart.items.count < 1)
-
-
     }
     
     var searchedRecipes:[Recipe] {
