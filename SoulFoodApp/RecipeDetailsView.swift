@@ -94,43 +94,91 @@ struct RecipeDetailsView: View {
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 30)
                 .onTapGesture {
-                    favourited.toggle()
+//                    favourited.toggle()
+                    if(favourited){
+                        removeRecipeFavourite()
+                    }
+                    else{
+                        setRecipeFavourite()
+                    }
                 }
                 .foregroundStyle(.yellow.gradient)
             
         }.onAppear{
-            print("http://127.0.0.1:8000/api/favourites/\(recipeDetails.id)")
-//            TokenManager.shared.
+            loadRecipeFavourite() 
         }
-        
     }
-    func loadRecipeFavourite() {
+    func setRecipeFavourite(){
+        let url = root + "/api/favourites/"
         
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+          
+        let json: [String: Any] = ["recipe_id": recipeDetails.id]
+
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+          
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                  if let httpResponse = response as? HTTPURLResponse {
+                     print(httpResponse.statusCode)
+                      if(httpResponse.statusCode == 404){
+                          print("ignored")
+                          return
+                      }
+                 }
+                  favourited = true
+              return
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
+    }
+    
+    func removeRecipeFavourite(){
         let url = root + "/api/favourites/\(recipeDetails.id)"
-//        guard let url = URL(string: root + _url) else {
-//            print("Invalid URL")
-//            return
-//        }
+        
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+           
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                  if let httpResponse = response as? HTTPURLResponse {
+                     print(httpResponse.statusCode)
+                      if(httpResponse.statusCode == 404){
+                          print("ignored")
+                          return
+                      }
+                 }
+                  favourited = false
+              return
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
+    }
+    
+    func loadRecipeFavourite() {
+        let url = root + "/api/favourites/\(recipeDetails.id)"
         
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
         request.httpMethod = "GET"
-        
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-//        URLSession.shared.dataTask(with: request) { data, response, error in
-//            if let data = data {
-//                
-//              do {
-//                  let decodedResponse = try JSONDecoder().decode([RecipeFavourite].self, from: data)
-//                  DispatchQueue.main.async{
-//                  }
-//              } catch {
-//                  print("Failed to decode JSON: \(error.localizedDescription)")
-//              }
-//              return
-//            }
-//            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-//        }.resume()
+          
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                  if let httpResponse = response as? HTTPURLResponse {
+                     print(httpResponse.statusCode)
+                      if(httpResponse.statusCode == 404){
+                          print("ignored")
+                          return
+                      }
+                 }
+                  favourited = true
+              return
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
     }
     
     var addOnSection: some View {
