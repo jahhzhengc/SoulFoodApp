@@ -9,8 +9,33 @@ import SwiftUI
 
 struct CartDisplay: View {
     @ObservedObject var cart: Cart  // Reference the shared cart
- 
+    
+    enum OrderType : String, CaseIterable, Identifiable {
+        case Delivery = "Delivery"
+        case PickUp = "Pick Up"
+        case HavingHere = "Having Here"
+         
+        var id: String { self.rawValue }
+    }
+    
+    @State var orderType : OrderType = .Delivery
+    
+    @Environment(\.dismiss) private var dismiss
+      
+    @State private var topExpanded: Bool = true
+
+    
+    let flatDeliveryFee : Double = 3.59
     var body: some View {
+          
+        Picker("Select an option", selection: $orderType) {
+               ForEach(OrderType.allCases) { option in
+                   Text(option.rawValue.capitalized).tag(option)
+               }
+           }
+           .pickerStyle(.segmented) 
+//        .pickerStyle(RadioG)
+//        .pickerStyle(.wheel)
         NavigationStack{
             ForEach(cart.items, id: \.self.id){ item in
                 NavigationLink{
@@ -22,17 +47,55 @@ struct CartDisplay: View {
                     OrderItemView(orderItem: item)
                 }
             }
-            //             .onDelete(perform: delete)
+            VStack{
+                HStack{
+                    Text("Subtotal (Incl. Tax)")
+                    Spacer()
+                    Text("\(cart.getTotalPrice())")
+                }
+                if (orderType == .Delivery){
+                    HStack{
+                        Text("Delivery fee")
+                        Spacer()
+                        Text("\(flatDeliveryFee.parsedPrice())")
+                    }
+                }
+                Divider()
+            }
+            Spacer()
+            
         }
         .navigationTitle("Order Summary")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear{
-            for i in 0..<cart.items.count{
-                print(cart.items[i].id)
-            }
+//            for i in 0..<cart.items.count{
+//                print(cart.items[i].id)
+//            }
+// this is used to debug the datas in cart, attempting to fix UI-Updating issue
         }
+        .padding()
         
+        sendOrderBtn
     }
+    
+    var sendOrderBtn : some View{
+        
+        Button{
+            
+            dismiss()
+        }label:{
+            let text =  "Total (incl. tax) \((flatDeliveryFee + cart.totalPrice).parsedPrice() )"
+            Label(text, systemImage:  "cart.fill")
+                .foregroundStyle(.white)
+        }
+        .padding()
+        .background(.blue)
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .overlay{
+            RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)
+        }
+    }
+    
 //    func delete(at offsets: IndexSet) {
 //        cart.remove(orderItem: offsets)
 //    }

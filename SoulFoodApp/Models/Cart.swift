@@ -22,9 +22,12 @@ class Cart: ObservableObject{
         if(items.count == 0) {
             return "$ 0.00"
         }
-        let totalPrice = items.map{ $0.totalPrice}.reduce(0, +)
+        let totalPrice = totalPrice
         
-        return items[0].recipe.parsedPrice(toParse: totalPrice)
+        return totalPrice.parsedPrice()
+    }
+    var totalPrice: Double{
+        return items.map{ $0.totalPrice}.reduce(0, +)
     }
     func updateOrderItem (uuid: UUID, orderItem: OrderItem){
         if let index = items.firstIndex(where: {$0.id == uuid}){
@@ -38,7 +41,7 @@ class Cart: ObservableObject{
 }
 
 extension Double{
-    func parsedPrice(price: Double)->String{
-        return "$ " + String(format: "%.2f", price)
+    func parsedPrice()->String{
+        return "$ " + String(format: "%.2f", self)
     }
 }

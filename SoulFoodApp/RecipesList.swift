@@ -15,11 +15,6 @@ struct RecipesList: View {
 
 //    var groupedRecipes: [String: String] = []
     
-    var body: some View {
-        let groupedRecipes = Dictionary(grouping: recipes, by: { $0.category })
-
-               
-        NavigationView {
 //            List(searchedRecipes, id: \.id) { recipe in
 //                NavigationLink{
 //                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
@@ -29,18 +24,28 @@ struct RecipesList: View {
 //                    RecipeView(recipeDetails: recipe)
 //                }
 //            } 
+    @State private var favourited  = false
+    var body: some View {
+        let groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category })
+
+       //TODO either make a horizontal scrollview that helps user gets to their preferred category
+        
+        // probably include a show favourite button here & there
+        NavigationStack{
+//        NavigationView {
             
             List{
                 ForEach(categories, id: \.self){ category in
                     Section(header: Text(category.name).font(.headline)) {
-//                    DisclosureGroup(
                         ForEach(groupedRecipes[category] ?? []) { recipe in
                             NavigationLink{
                                RecipeDetailsView(recipeDetails: recipe, cart: cart)
                                    .navigationTitle(recipe.name)
                                    .navigationBarTitleDisplayMode(.inline)
                            }label:{
-                               RecipeView(recipeDetails: recipe)
+//                               if (recipe.favourited){
+                                   RecipeView(recipeDetails: recipe)
+//                               }
                            }
                         }
                     }
@@ -72,16 +77,17 @@ struct RecipesList: View {
     var cartBtn: some View{
         ZStack {
             Circle()
-                .fill(.blue.gradient)
-                .frame(width: 80, height: 80)
-                .overlay(
-                    Circle().stroke(.gray.gradient, lineWidth: 1)
-                )
-                .shadow(color: .blue, radius: (changeColor ? 1 : 5))
-                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: changeColor) // Animation applied here
-                .onAppear {
-                    changeColor.toggle()
-                }
+              .fill(.blue.gradient)
+              .frame(width: 80, height: 80)
+              .overlay(
+                  Circle().stroke(.gray.gradient, lineWidth: 1)
+              )
+              .shadow(color: .blue, radius: (changeColor ? 7 : 5)) // Change the order of shadow animation
+              .onAppear {
+                  withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                      changeColor.toggle()
+                  }
+              }
  
             Image(systemName: "cart.badge.plus")
                 .resizable()
@@ -91,10 +97,14 @@ struct RecipesList: View {
                 
         }
         .frame(width: 80, height: 80)
+        .fixedSize()    
         .opacity(cart.items.count < 1 ? 0.0 : 1.0)
         .animation(.easeInOut(duration: 0.6), value: cart.items.count < 1)
     }
     
+    var favouritedRecipe: [Recipe]{
+        return recipes.filter{ $0.favourited}
+    }
     var searchedRecipes:[Recipe] {
         if searchQuery.isEmpty{
             return recipes
@@ -117,7 +127,8 @@ struct RecipesList: View {
                       
                       self.categories = Array(Set(decodedResponse.map { $0.category }))
                           .sorted(by: {  ($0.display_order_mobile, $0.name) < ($1.display_order_mobile, $1.name) })
- 
+                      
+                      loadFavourites()
                       self.loaded = true
                   }
               } catch {
@@ -127,6 +138,40 @@ struct RecipesList: View {
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
+        
+       
+    }
+    
+    @State private var recipeFavourites = [Int]()
+    func loadFavourites(){
+        let request = TokenManager.shared.wrappedRequest(sendReq: root + "/api/favourites/")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data{
+                do{
+                    let decodedResponse = try JSONDecoder().decode([RecipeFavourite].self, from: data)
+                    DispatchQueue.main.async{
+                        
+                        for i in 0..<decodedResponse.count{
+                            for j in 0..<recipes.count{
+                                if recipes[j].id == decodedResponse[i].recipe {
+                                    recipes[j].favourited = true
+                                    break
+                                }
+                            }
+//                            if let recipe = recipes.first(where: { $0.id == decodedResponse[i].recipe  }) {
+//                                print(recipe.name)
+//                            }
+                        }
+                    }
+                } catch {
+                    print("Failed to decode JSON: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+        }
+        .resume()
     }
 }
 

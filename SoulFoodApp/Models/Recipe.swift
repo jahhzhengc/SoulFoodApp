@@ -16,6 +16,8 @@ struct Recipe: Codable, Identifiable {
     var media_file: String
     var category: Category
     var options : [Option]
+    
+    var favourited: Bool = false
     enum CodingKeys: String, CodingKey {
         case id, name, desc, price, availability, media_file, category, options
     }
@@ -84,6 +86,8 @@ struct Recipe: Codable, Identifiable {
     }
     
     func allPriceConsideredString(quantity: Int) -> String{
-        return parsedPrice(toParse:allPriceConsidered * Double(quantity))
+        return (allPriceConsidered * Double(quantity)).parsedPrice() 
     }
 }
+
+//extension Recipe

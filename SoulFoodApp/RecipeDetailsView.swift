@@ -105,7 +105,7 @@ struct RecipeDetailsView: View {
                 .foregroundStyle(.yellow.gradient)
             
         }.onAppear{
-            loadRecipeFavourite() 
+            loadRecipeFavourite()
         }
     }
     func setRecipeFavourite(){
@@ -250,7 +250,7 @@ struct RecipeDetailsView: View {
             dismiss()
         }label:{
             let text = !edit ?  "Add To Cart - " : "Edit Cart - "
-            Label(text + (recipeDetails.parsedPrice (toParse: recipeDetails.allPriceConsidered * Double(num))), systemImage:  "cart.fill")
+            Label(text + (recipeDetails.allPriceConsideredString(quantity: num)), systemImage:  "cart.fill")
                 .foregroundStyle(.white)
         }
         .padding()
