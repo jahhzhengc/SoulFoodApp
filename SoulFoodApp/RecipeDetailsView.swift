@@ -20,7 +20,8 @@ struct RecipeDetailsView: View {
     @State var index: UUID = UUID()
     
     @State var favourited: Bool = false
-     
+    
+    @State private var toast: Toast? = nil
     var body: some View {
          
         ScrollView(.vertical, showsIndicators: false){
@@ -76,6 +77,7 @@ struct RecipeDetailsView: View {
                 addToCartBtn
             }
         }
+        .toastView(toast: $toast)
     }
     
     let width :CGFloat = 100
@@ -100,6 +102,7 @@ struct RecipeDetailsView: View {
                     }
                     else{
                         setRecipeFavourite()
+                        toast = Toast(style: .success, message: "This menu item is now added to your favourite list.") 
                     }
                 }
                 .foregroundStyle(.yellow.gradient)
