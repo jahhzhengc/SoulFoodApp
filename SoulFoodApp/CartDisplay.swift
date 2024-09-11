@@ -23,31 +23,70 @@ struct CartDisplay: View {
     @Environment(\.dismiss) private var dismiss
       
     @State private var topExpanded: Bool = true
-
     
+    @State private var promoCode: String = ""
+    
+    @FocusState private var isFocused: Bool
     let flatDeliveryFee : Double = 3.59
     var body: some View {
-          
-        Picker("Select an option", selection: $orderType) {
-               ForEach(OrderType.allCases) { option in
-                   Text(option.rawValue.capitalized).tag(option)
-               }
-           }
-           .pickerStyle(.segmented) 
-//        .pickerStyle(RadioG)
-//        .pickerStyle(.wheel)
-        NavigationStack{
-            ForEach(cart.items, id: \.self.id){ item in
-                NavigationLink{
-                    RecipeDetailsView(recipeDetails: item.recipe, num: item.quantity, cart: cart
-                                      ,edit: true, index: item.id)
-                    .navigationTitle("Edit cart")
-                    .navigationBarTitleDisplayMode(.inline)
-                }label:{
-                    OrderItemView(orderItem: item)
+        
+        VStack {
+            Picker("Select an option", selection: $orderType) {
+                ForEach(OrderType.allCases) { option in
+                    Text(option.rawValue.capitalized).tag(option)
                 }
             }
+            .pickerStyle(.segmented)
+            List{
+                ForEach(cart.items, id: \.self.id){ item in
+                    NavigationLink{
+                        RecipeDetailsView(recipeDetails: item.recipe, num: item.quantity, cart: cart
+                                          ,edit: true, index: item.id)
+                        .navigationTitle("Edit cart")
+                        .navigationBarTitleDisplayMode(.automatic)
+                        
+                    }label:{
+                        OrderItemView(orderItem: item)
+                    }
+                }
+                .onDelete(perform: removeRows)
+                
+                
+            }
+            .listStyle(PlainListStyle())
+            .foregroundStyle(.black)
+            .background(.gray.opacity(0.1).gradient)
+            .scrollContentBackground(.hidden)
+            
+//            .background(.red)
+//            .frame(width: .infinity)
+            
             VStack{
+                TextField("Enter promo or gift code here", text: $promoCode, onEditingChanged: { (editingChanged) in
+                    if editingChanged {
+                        print("TextField focused")
+                    } else {
+                        print("TextField focus removed")
+                    }
+                })
+                    .padding()
+                    .background(.gray.opacity(0.2))
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                
+                    .overlay{
+                        RoundedRectangle(cornerRadius: 20).stroke(.gray, lineWidth: 1)
+                    }
+                    .padding(.bottom, 12)
+//                    .onChange(of: promoCode) { _, newValue in
+////                        guard let newValueLastChar = newValue.last else { return }
+//                        print(newValue)
+//                    }
+                    .keyboardType(.asciiCapableNumberPad)
+                    .focused($isFocused)
+                    .onSubmit {
+                        print("onSubmit")
+                    }
                 HStack{
                     Text("Subtotal (Incl. Tax)")
                     Spacer()
@@ -62,21 +101,28 @@ struct CartDisplay: View {
                 }
                 Divider()
             }
+            .padding()
             Spacer()
-            
         }
         .navigationTitle("Order Summary")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear{
-//            for i in 0..<cart.items.count{
-//                print(cart.items[i].id)
-//            }
-// this is used to debug the datas in cart, attempting to fix UI-Updating issue
+        .toolbar{
+            Button{
+                cart.items.removeAll()
+                dismiss()
+            }label:{
+                Text("Clear Cart")
+            }
         }
-        .padding()
         
         sendOrderBtn
     }
+      func removeRows(at offsets: IndexSet) {
+          cart.items.remove(atOffsets: offsets)
+          if(cart.items.count < 1){
+              dismiss()
+          }
+      }
     
     var sendOrderBtn : some View{
         
@@ -90,6 +136,7 @@ struct CartDisplay: View {
         }
         .padding()
         .background(.blue)
+        .buttonStyle(.borderedProminent)
         .clipShape(RoundedRectangle(cornerRadius: 25))
         .overlay{
             RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)

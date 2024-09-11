@@ -29,11 +29,11 @@ struct OrderItemView: View {
             
             Text(orderItem.getTotalPrice)
         }
-        .padding()
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay{
-            RoundedRectangle(cornerRadius: 10).stroke(.gray, lineWidth: 1)
-        }
+//        .padding()
+//        .clipShape(RoundedRectangle(cornerRadius: 10))
+//        .overlay{
+//            RoundedRectangle(cornerRadius: 10).stroke(.gray, lineWidth: 1)
+//        }
         
     }
 }
