@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct RecipeDetailsView: View {
-    @State private var root: String = "http://127.0.0.1:8000"
     @Environment(\.dismiss) private var dismiss
     
     @State var recipeDetails : Recipe
@@ -25,7 +24,7 @@ struct RecipeDetailsView: View {
     var body: some View {
          
         ScrollView(.vertical, showsIndicators: false){
-            AsyncImage(url: URL(string: root + recipeDetails.media_file)) { image in
+            AsyncImage(url: URL(string: TokenManager.shared.root + recipeDetails.media_file)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -112,7 +111,7 @@ struct RecipeDetailsView: View {
         }
     }
     func setRecipeFavourite(){
-        let url = root + "/api/favourites/"
+        let url = TokenManager.shared.root + "/api/favourites/"
         
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
           
@@ -140,7 +139,7 @@ struct RecipeDetailsView: View {
     }
     
     func removeRecipeFavourite(){
-        let url = root + "/api/favourites/\(recipeDetails.id)"
+        let url = TokenManager.shared.root + "/api/favourites/\(recipeDetails.id)"
         
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
            
@@ -163,7 +162,7 @@ struct RecipeDetailsView: View {
     }
     
     func loadRecipeFavourite() {
-        let url = root + "/api/favourites/\(recipeDetails.id)"
+        let url = TokenManager.shared.root + "/api/favourites/\(recipeDetails.id)"
         
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
         request.httpMethod = "GET"

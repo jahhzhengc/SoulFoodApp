@@ -2,7 +2,6 @@ import SwiftUI
 
 struct RecipesList: View {
     @State private var recipes = [Recipe]()
-    @State private var root: String = "http://127.0.0.1:8000"
     @State private var url = "/api/recipes"
     @State private var loaded : Bool = false
     
@@ -112,7 +111,7 @@ struct RecipesList: View {
         return recipes.filter {$0.name.contains(searchQuery)}
     }
     func loadRecipes() {
-        guard let url = URL(string: root + url) else {
+        guard let url = URL(string: TokenManager.shared.root + url) else {
             print("Invalid URL")
             return
         }
@@ -144,7 +143,7 @@ struct RecipesList: View {
     
     @State private var recipeFavourites = [Int]()
     func loadFavourites(){
-        let request = TokenManager.shared.wrappedRequest(sendReq: root + "/api/favourites/")
+        let request = TokenManager.shared.wrappedRequest(sendReq: TokenManager.shared.root + "/api/favourites/")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data{

@@ -8,12 +8,11 @@
 import SwiftUI
 
 struct RecipeView: View {
-    var recipeDetails: Recipe
-    @State private var root: String = "http://127.0.0.1:8000"
+    var recipeDetails: Recipe 
     var body: some View {
         ZStack(alignment: .bottomTrailing){
             HStack(alignment:.top){
-                AsyncImage(url: URL(string: root + recipeDetails.media_file)) { image in
+                AsyncImage(url: URL(string: TokenManager.shared.root + recipeDetails.media_file)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)

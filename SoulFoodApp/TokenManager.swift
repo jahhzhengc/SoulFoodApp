@@ -12,6 +12,10 @@ class TokenManager {
     static let shared = TokenManager()
     
     private let tokenKey = "auth_token"
+
+//    let root: String = "http://127.0.0.1:8000"
+    
+    let root: String = "http://192.168.1.7:8000"
     
     func saveToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: tokenKey)
