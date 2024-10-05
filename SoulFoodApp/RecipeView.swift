@@ -13,22 +13,7 @@ struct RecipeView: View {
         ZStack(alignment: .bottomTrailing){
             HStack(alignment:.top){
                 AsyncImage(url: URL(string: TokenManager.shared.root + recipeDetails.media_file)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(minWidth: 0,
-                              maxWidth: .infinity,
-                              minHeight: 0,
-                              maxHeight: .infinity)
-                            .clipped()
-                            .aspectRatio(1, contentMode: .fit)
-                            .frame(width: 90, height: 90)
-                            .clipShape(RoundedRectangle(cornerRadius: 12.5))
-                            .overlay{
-                                RoundedRectangle(cornerRadius: 12.5).stroke(.black, lineWidth: 2)
-                            }
-                            .shadow(radius: 5)
-                            .padding(2)
+                        applyModifiers(to: image)
                     } placeholder: {
                         ProgressView()
                     }
@@ -52,6 +37,26 @@ struct RecipeView: View {
             Spacer()
         }
     } 
+    
+    
+   private func applyModifiers(to image: Image) -> some View {
+       image
+           .resizable()
+           .aspectRatio(contentMode: .fill)
+           .frame(minWidth: 0,
+             maxWidth: .infinity,
+             minHeight: 0,
+             maxHeight: .infinity)
+           .clipped()
+           .aspectRatio(1, contentMode: .fit)
+           .frame(width: 90, height: 90)
+           .clipShape(RoundedRectangle(cornerRadius: 12.5))
+           .overlay{
+               RoundedRectangle(cornerRadius: 12.5).stroke(.black, lineWidth: 2)
+           }
+           .shadow(radius: 5)
+           .padding(2)
+   }
 }
 
 #Preview {

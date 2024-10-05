@@ -31,12 +31,14 @@ struct CartDisplay: View {
     var body: some View {
         
         VStack {
+            // Can definitely be better
             Picker("Select an option", selection: $orderType) {
                 ForEach(OrderType.allCases) { option in
                     Text(option.rawValue.capitalized).tag(option)
                 }
             }
             .pickerStyle(.segmented)
+            
             List{
                 ForEach(cart.items, id: \.self.id){ item in
                     NavigationLink{
@@ -66,6 +68,9 @@ struct CartDisplay: View {
                     if editingChanged {
                         print("TextField focused")
                     } else {
+                        // when the search query is send it should be uninteractable + have a loading screen on top of it
+                        usePromoCode(code: promoCode)
+//                        TokenManager.shared.wrappedRequest(sendReq: <#T##String#>)
                         print("TextField focus removed")
                     }
                 })
@@ -117,12 +122,37 @@ struct CartDisplay: View {
         
         sendOrderBtn
     }
-      func removeRows(at offsets: IndexSet) {
-          cart.items.remove(atOffsets: offsets)
-          if(cart.items.count < 1){
-              dismiss()
-          }
+    func removeRows(at offsets: IndexSet) {
+      cart.items.remove(atOffsets: offsets)
+      if(cart.items.count < 1){
+          dismiss()
       }
+    }
+    @State private var code : PromoCode = PromoCode()
+    func usePromoCode(code: String){
+        let url = TokenManager.shared.root + "/api/ars/promocodes/search/?code=" + code
+            //    http://127.0.0.1:8000/api/ars/promocodes/search/?code=ABCDE
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+           
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+              do {
+                  let decodedResponse = try JSONDecoder().decode(PromoCode.self, from: data)
+                  DispatchQueue.main.async {
+                      self.code = decodedResponse
+                  }
+                  print(decodedResponse)
+              } catch {
+                  print("Failed to decode JSON: \(error.localizedDescription)")
+              }
+              return
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
+         
+    }
     
     var sendOrderBtn : some View{
         

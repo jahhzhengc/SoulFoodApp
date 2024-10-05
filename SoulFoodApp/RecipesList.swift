@@ -25,8 +25,8 @@ struct RecipesList: View {
 //            } 
     @State private var favourited  = false
     var body: some View {
-        let groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category })
-
+        var groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category}).filter{ !$0.value.isEmpty}
+         
        //TODO either make a horizontal scrollview that helps user gets to their preferred category
         
         // probably include a show favourite button here & there
@@ -34,18 +34,20 @@ struct RecipesList: View {
 //        NavigationView {
             
             List{
-                ForEach(categories, id: \.self){ category in
-                    Section(header: Text(category.name).font(.headline)) {
-                        ForEach(groupedRecipes[category] ?? []) { recipe in
-                            NavigationLink{
-                               RecipeDetailsView(recipeDetails: recipe, cart: cart)
-                                   .navigationTitle(recipe.name)
-                                   .navigationBarTitleDisplayMode(.inline)
-                           }label:{
-//                               if (recipe.favourited){
-                                   RecipeView(recipeDetails: recipe)
-//                               }
-                           }
+                ForEach(categories, id: \.self){ category in 
+                    if let recipes = groupedRecipes[category], !recipes.isEmpty {
+                        Section(header: Text(category.name).font(.headline)) {
+                            ForEach(groupedRecipes[category] ?? []) { recipe in
+                                NavigationLink{
+                                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
+                                        .navigationTitle(recipe.name)
+                                        .navigationBarTitleDisplayMode(.inline)
+                                }label:{
+                                    //                               if (recipe.favourited){
+                                    RecipeView(recipeDetails: recipe)
+                                    //                               }
+                                }
+                            }
                         }
                     }
                 }
@@ -108,7 +110,9 @@ struct RecipesList: View {
         if searchQuery.isEmpty{
             return recipes
         }
-        return recipes.filter {$0.name.contains(searchQuery)}
+        var toReturn = recipes.filter {$0.name.lowercased().contains(searchQuery.lowercased())}
+        print(toReturn.count)
+        return toReturn
     }
     func loadRecipes() {
         guard let url = URL(string: TokenManager.shared.root + url) else {
