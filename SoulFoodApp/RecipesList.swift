@@ -22,7 +22,9 @@ struct RecipesList: View {
 //                }label:{
 //                    RecipeView(recipeDetails: recipe)
 //                }
-//            } 
+//            }
+    @State private var selectedCategory: Category? = nil // To track the selected category
+
     @State private var favourited  = false
     var body: some View {
         var groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category}).filter{ !$0.value.isEmpty}
@@ -31,43 +33,75 @@ struct RecipesList: View {
         
         // probably include a show favourite button here & there
         NavigationStack{
-//        NavigationView {
             
-            List{
-                ForEach(categories, id: \.self){ category in 
-                    if let recipes = groupedRecipes[category], !recipes.isEmpty {
-                        Section(header: Text(category.name).font(.headline)) {
-                            ForEach(groupedRecipes[category] ?? []) { recipe in
-                                NavigationLink{
-                                    RecipeDetailsView(recipeDetails: recipe, cart: cart)
-                                        .navigationTitle(recipe.name)
-                                        .navigationBarTitleDisplayMode(.inline)
-                                }label:{
-                                    //                               if (recipe.favourited){
-                                    RecipeView(recipeDetails: recipe)
-                                    //                               }
+            
+//            ScrollView(.horizontal, showsIndicators: false) {
+//                HStack {
+//                    ForEach(categories, id: \.self) { category in
+//                        Button(action: {
+//                            // Scroll to the selected category
+//                            selectedCategory = category
+//                        }) {
+//                            Text(category.name)
+//                                .padding()
+//                                .background(selectedCategory == category ? Color.blue : Color.gray)
+//                                .foregroundColor(.white)
+//                                .cornerRadius(10)
+//                        }
+//                    }
+//                }
+//                .padding(.horizontal)
+//            }
+            ScrollViewReader { proxy in
+                List{
+                    ForEach(categories, id: \.self){ category in
+                        
+                        if let recipes = groupedRecipes[category], !recipes.isEmpty {
+//                            Section(header: Text(category.name).font(.headline).id(category.id)) {
+                            Section(header: Text(category.name).font(.headline).id(category.id)) {
+                                ForEach(groupedRecipes[category] ?? []) { recipe in
+                                    NavigationLink{
+                                        RecipeDetailsView(recipeDetails: recipe, cart: cart)
+                                            .navigationTitle(recipe.name)
+                                            .navigationBarTitleDisplayMode(.inline)
+                                    }label:{
+                                        //                               if (recipe.favourited){
+                                        RecipeView(recipeDetails: recipe)
+                                        //                               }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            .listStyle(PlainListStyle())
-            .navigationTitle("Menu")
-            .navigationBarTitleDisplayMode(.automatic)
-//            .listStyle(SidebarListStyle())
-            .searchable(text: $searchQuery, prompt: "Search for recipes")
-            .overlay(alignment: .bottomTrailing){
-                NavigationLink{
-                    CartDisplay(cart: cart)
-                }label:{
-                    cartBtn
+                .listStyle(PlainListStyle())
+                .navigationTitle("Menu")
+                .navigationBarTitleDisplayMode(.automatic)
+                .searchable(text: $searchQuery, prompt: "Search for recipes")
+                .overlay(alignment: .bottomTrailing){
+                    NavigationLink{
+                        CartDisplay(cart: cart)
+                    }label:{
+                        cartBtn
+                    }
+                    .navigationTitle("Cart")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .padding()
+                    .disabled(cart.items.count < 1)
                 }
-                .navigationTitle("Cart")
-                .navigationBarTitleDisplayMode(.inline)
-                .padding()
-                .disabled(cart.items.count < 1)
+                .onChange(of: selectedCategory) { category in
+                    // Scroll to the selected category section
+                    print(category)
+                    if let category = category {
+                        print(category.id)
+                        withAnimation (.easeInOut) {
+                            // so its scroll to categories's recipe
+                            proxy.scrollTo(category.id, anchor: .top)
+                        }
+                    }
+                }
             }
+            
              
         }
      

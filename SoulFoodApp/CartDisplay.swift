@@ -70,7 +70,9 @@ struct CartDisplay: View {
                         print("TextField focused")
                     } else {
                         // when the search query is send it should be uninteractable + have a loading screen on top of it
-                        searchPromoCode()
+                        Task{
+                          await   searchPromoCode()
+                        }
 //                        TokenManager.shared.wrappedRequest(sendReq: <#T##String#>)
                         print("TextField focus removed")
                     }
@@ -178,8 +180,9 @@ struct CartDisplay: View {
         }.resume()
          
     }
-    func searchPromoCode(){
+    func searchPromoCode() async{
         if(promoCode.isEmpty){
+            code = PromoCode()
             return
         }
         let url = TokenManager.shared.root + "/api/ars/promocodes/search/?code=" + promoCode
@@ -197,8 +200,10 @@ struct CartDisplay: View {
                   if let httpResponse = response as? HTTPURLResponse {
                       if(httpResponse.statusCode != 200){
                           let error = try JSONDecoder().decode(ErrorResponse.self, from: data)
-                          toast = Toast(style: .error, message: error.detail)
-                          print(error)
+                          DispatchQueue.main.async {
+                              toast = Toast(style: .error, message: error.detail)
+                              code = PromoCode()
+                          }
                           return
                       }
                  }
@@ -206,13 +211,14 @@ struct CartDisplay: View {
                   DispatchQueue.main.async {
                       self.code = decodedResponse
                       toast = Toast(style: .success, message: "Promotion code applied!")
-
                   }
                   
                   print(decodedResponse)
               } catch {
                   print("Failed to decode JSON: \(error.localizedDescription)")
-                  code = PromoCode()
+                  DispatchQueue.main.async {
+                      code = PromoCode()
+                  }
               }
               return
             }
@@ -240,10 +246,7 @@ struct CartDisplay: View {
             RoundedRectangle(cornerRadius: /*@START_MENU_TOKEN@*/25.0/*@END_MENU_TOKEN@*/).stroke(.gray, lineWidth: 0)
         }
     }
-    
-//    func delete(at offsets: IndexSet) {
-//        cart.remove(orderItem: offsets)
-//    }
+     
 }
 
 #Preview {
