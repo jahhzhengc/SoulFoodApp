@@ -26,6 +26,7 @@ struct CartDisplay: View {
     
     @State private var promoCode: String = ""
     
+    @State private var toast: Toast? = nil
     @FocusState private var isFocused: Bool
     let flatDeliveryFee : Double = 3.59
     var body: some View {
@@ -69,7 +70,7 @@ struct CartDisplay: View {
                         print("TextField focused")
                     } else {
                         // when the search query is send it should be uninteractable + have a loading screen on top of it
-                        usePromoCode(code: promoCode)
+                        searchPromoCode()
 //                        TokenManager.shared.wrappedRequest(sendReq: <#T##String#>)
                         print("TextField focus removed")
                     }
@@ -104,6 +105,21 @@ struct CartDisplay: View {
                         Text("\(flatDeliveryFee.parsedPrice())")
                     }
                 }
+//                let discounted = code.type == "FLAT" ? Double(code.discount) : cart.totalPrice * Double(code.discount)/100
+                if(code.discount != 0){
+                    HStack{
+                        Text("Promotion included")
+                        Spacer()
+                        Text("- \(discounted.parsedPrice())")
+                    }
+                }
+//                HStack{
+//                    Text("Total Price: ")
+//                    Spacer()
+//                    let totalPrice: Double = cart.totalPrice - discounted +
+//                    (orderType == .Delivery ? flatDeliveryFee : 0.00)
+//                    Text("\(totalPrice.parsedPrice())")
+//                }
                 Divider()
             }
             .padding()
@@ -119,8 +135,13 @@ struct CartDisplay: View {
                 Text("Clear Cart")
             }
         }
+        .toastView(toast: $toast)
         
         sendOrderBtn
+    }
+    
+    var discounted : Double{
+        return code.type == "FLAT" ? Double(code.discount) : cart.totalPrice * Double(code.discount)/100
     }
     func removeRows(at offsets: IndexSet) {
       cart.items.remove(atOffsets: offsets)
@@ -129,20 +150,24 @@ struct CartDisplay: View {
       }
     }
     @State private var code : PromoCode = PromoCode()
-    func usePromoCode(code: String){
-        let url = TokenManager.shared.root + "/api/ars/promocodes/search/?code=" + code
-            //    http://127.0.0.1:8000/api/ars/promocodes/search/?code=ABCDE
+    
+    func usePromoCode(){
+        if(promoCode.isEmpty){
+            return
+        }
+                                     //        api/promocode_used/code?=ABCDE
+        let url = TokenManager.shared.root + "/api/promocode_used/?code=" + promoCode
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
            
-        request.httpMethod = "GET"
+        request.httpMethod = "POST"
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
               do {
                   let decodedResponse = try JSONDecoder().decode(PromoCode.self, from: data)
-                  DispatchQueue.main.async {
-                      self.code = decodedResponse
-                  }
+//                  DispatchQueue.main.async {
+////                      self.code = decodedResponse
+//                  }
                   print(decodedResponse)
               } catch {
                   print("Failed to decode JSON: \(error.localizedDescription)")
@@ -153,14 +178,57 @@ struct CartDisplay: View {
         }.resume()
          
     }
+    func searchPromoCode(){
+        if(promoCode.isEmpty){
+            return
+        }
+        let url = TokenManager.shared.root + "/api/ars/promocodes/search/?code=" + promoCode
+            //    http://127.0.0.1:8000/api/ars/promocodes/search/?code=ABCDE
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+           
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+           
+            if let data = data {
+                
+              do {
+                  if let httpResponse = response as? HTTPURLResponse {
+                      if(httpResponse.statusCode != 200){
+                          let error = try JSONDecoder().decode(ErrorResponse.self, from: data)
+                          toast = Toast(style: .error, message: error.detail)
+                          print(error)
+                          return
+                      }
+                 }
+                  let decodedResponse = try JSONDecoder().decode(PromoCode.self, from: data)
+                  DispatchQueue.main.async {
+                      self.code = decodedResponse
+                      toast = Toast(style: .success, message: "Promotion code applied!")
+
+                  }
+                  
+                  print(decodedResponse)
+              } catch {
+                  print("Failed to decode JSON: \(error.localizedDescription)")
+                  code = PromoCode()
+              }
+              return
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
+         
+    }
     
     var sendOrderBtn : some View{
-        
         Button{
-            
+            usePromoCode()
             dismiss()
         }label:{
-            let text =  "Total (incl. tax) \((flatDeliveryFee + cart.totalPrice).parsedPrice() )"
+            let totalPrice: Double = cart.totalPrice - discounted +
+            (orderType == .Delivery ? flatDeliveryFee : 0.00)
+            let text =  "Total (incl. tax) \(totalPrice.parsedPrice())"
             Label(text, systemImage:  "cart.fill")
                 .foregroundStyle(.white)
         }
