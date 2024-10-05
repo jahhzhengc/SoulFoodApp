@@ -27,7 +27,7 @@ struct RecipesList: View {
 
     @State private var favourited  = false
     var body: some View {
-        var groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category}).filter{ !$0.value.isEmpty}
+        let groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category}).filter{ !$0.value.isEmpty}
          
        //TODO either make a horizontal scrollview that helps user gets to their preferred category
         
@@ -89,17 +89,17 @@ struct RecipesList: View {
                     .padding()
                     .disabled(cart.items.count < 1)
                 }
-                .onChange(of: selectedCategory) { category in
-                    // Scroll to the selected category section
-                    print(category)
-                    if let category = category {
-                        print(category.id)
-                        withAnimation (.easeInOut) {
-                            // so its scroll to categories's recipe
-                            proxy.scrollTo(category.id, anchor: .top)
-                        }
-                    }
-                }
+//                .onChange(of: selectedCategory) { category in
+//                    // Scroll to the selected category section
+//                    print(category)
+//                    if let category = category {
+//                        print(category.id)
+//                        withAnimation (.easeInOut) {
+//                            // so its scroll to categories's recipe
+//                            proxy.scrollTo(category.id, anchor: .top)
+//                        }
+//                    }
+//                }
             }
             
              

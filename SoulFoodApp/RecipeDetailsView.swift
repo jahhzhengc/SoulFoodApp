@@ -239,15 +239,26 @@ struct RecipeDetailsView: View {
     
     var addToCartBtn : some View{
         Button{
-            if !edit{ 
-                let orderItem = OrderItem(recipe: recipeDetails, quantity: num)
-                print(orderItem.id)
-                cart.add(orderItem: orderItem)
+            if !edit{
+                
+                var check = false
+                for i in 0..<cart.items.count{
+                    if(cart.items[i].recipe == recipeDetails){
+                        cart.items[i].quantity += num
+                        check = true
+                        print("FOUND THE SAME RECIPE IN CART, it should add quantity instead")
+                    }
+                }
+                
+                if !check{
+                    let orderItem = OrderItem(recipe: recipeDetails, quantity: num)
+//                    print(orderItem.id)
+                    cart.add(orderItem: orderItem)
+                }
             }
             else{
                 let orderItem = OrderItem(recipe: recipeDetails, quantity: num)
-                
-                cart.updateOrderItem(uuid: index, orderItem: orderItem) 
+                cart.updateOrderItem(uuid: index, orderItem: orderItem)
             }
             dismiss()
         }label:{

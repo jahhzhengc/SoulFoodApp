@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Recipe: Codable, Identifiable {
+struct Recipe: Codable, Identifiable, Equatable {
     var id: Int
     var name: String
     var desc: String
@@ -16,6 +16,11 @@ struct Recipe: Codable, Identifiable {
     var media_file: String
     var category: Category
     var options : [Option]
+    
+    
+    static func == (lhs:Recipe,rhs:Recipe) ->Bool{
+        return lhs.id == rhs.id && lhs.options == rhs.options
+    }
     
     var favourited: Bool = false
     enum CodingKeys: String, CodingKey {

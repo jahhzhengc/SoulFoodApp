@@ -7,11 +7,16 @@
 
 import Foundation
 
-struct Option: Codable, Identifiable{
+struct Option: Codable, Identifiable, Equatable{
     var id: Int
     var name: String
     var price_adjustment: Double
     var toggled: Bool = false
+    
+    // it needs to be ticked / unticked 
+    static func == (lhs:Option,rhs:Option) ->Bool{
+        return lhs.id == rhs.id && lhs.toggled == rhs.toggled
+    }
     init(){
         self.name = ""
         self.id = 0
