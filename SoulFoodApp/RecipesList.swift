@@ -29,6 +29,7 @@ struct RecipesList: View {
     var body: some View {
         let groupedRecipes = Dictionary(grouping: searchedRecipes, by: { $0.category}).filter{ !$0.value.isEmpty}
          
+//        print(groupedRecipes.isEmpty)
        //TODO either make a horizontal scrollview that helps user gets to their preferred category
         
         // probably include a show favourite button here & there
@@ -47,15 +48,19 @@ struct RecipesList: View {
 //                                .background(selectedCategory == category ? Color.blue : Color.gray)
 //                                .foregroundColor(.white)
 //                                .cornerRadius(10)
+//                                
 //                        }
+////                        .padding()
+////                        .frame(height: 40)
 //                    }
 //                }
+//            
 //                .padding(.horizontal)
+//                .padding(10)
 //            }
-            ScrollViewReader { proxy in
+//            ScrollViewReader { proxy in
                 List{
                     ForEach(categories, id: \.self){ category in
-                        
                         if let recipes = groupedRecipes[category], !recipes.isEmpty {
 //                            Section(header: Text(category.name).font(.headline).id(category.id)) {
                             Section(header: Text(category.name).font(.headline).id(category.id)) {
@@ -65,9 +70,7 @@ struct RecipesList: View {
                                             .navigationTitle(recipe.name)
                                             .navigationBarTitleDisplayMode(.inline)
                                     }label:{
-                                        //                               if (recipe.favourited){
                                         RecipeView(recipeDetails: recipe)
-                                        //                               }
                                     }
                                 }
                             }
@@ -78,6 +81,19 @@ struct RecipesList: View {
                 .navigationTitle("Menu")
                 .navigationBarTitleDisplayMode(.automatic)
                 .searchable(text: $searchQuery, prompt: "Search for recipes")
+                .textInputAutocapitalization(.never)
+                .overlay{
+                    // if I'm searching something, but its returning nothing
+                    if !searchQuery.isEmpty && groupedRecipes.isEmpty{
+                        ContentUnavailableView(
+                                 "Product not available",
+                                 systemImage: "magnifyingglass",
+                                 description: Text("No results for \(searchQuery)")
+                             )
+                        
+                    
+                    }
+                }
                 .overlay(alignment: .bottomTrailing){
                     NavigationLink{
                         CartDisplay(cart: cart)
@@ -89,6 +105,15 @@ struct RecipesList: View {
                     .padding()
                     .disabled(cart.items.count < 1)
                 }
+                .toolbar{
+                    Button{ 
+                        showFavourite.toggle()
+                    }label:{
+                        Label("test", systemImage: showFavourite ? "star.fill" : "star")
+                    }
+                }
+//                .background(.red)
+//                .padding(.vertical)
 //                .onChange(of: selectedCategory) { category in
 //                    // Scroll to the selected category section
 //                    print(category)
@@ -100,13 +125,14 @@ struct RecipesList: View {
 //                        }
 //                    }
 //                }
-            }
+//            }
             
              
         }
      
         .onAppear(perform: loadRecipes)
     }
+    @State private var showFavourite = false
      
     @State private var changeColor = false
     var cartBtn: some View{
@@ -141,11 +167,19 @@ struct RecipesList: View {
         return recipes.filter{ $0.favourited}
     }
     var searchedRecipes:[Recipe] {
-        if searchQuery.isEmpty{
-            return recipes
+        // searchQuery isEmpty // showFAvourite is true
+        var toReturn = recipes
+        
+        if(showFavourite){
+            toReturn = toReturn.filter{$0.favourited}
         }
-        var toReturn = recipes.filter {$0.name.lowercased().contains(searchQuery.lowercased())}
-        print(toReturn.count)
+        if searchQuery.isEmpty  {
+            print(toReturn.count)
+            return toReturn
+        }
+        
+        toReturn = recipes.filter {$0.name.lowercased().contains(searchQuery.lowercased())}
+      
         return toReturn
     }
     func loadRecipes() {
@@ -189,17 +223,28 @@ struct RecipesList: View {
                     let decodedResponse = try JSONDecoder().decode([RecipeFavourite].self, from: data)
                     DispatchQueue.main.async{
                         
-                        for i in 0..<decodedResponse.count{
-                            for j in 0..<recipes.count{
-                                if recipes[j].id == decodedResponse[i].recipe {
-                                    recipes[j].favourited = true
-                                    break
-                                }
-                            }
-//                            if let recipe = recipes.first(where: { $0.id == decodedResponse[i].recipe  }) {
-//                                print(recipe.name)
+                        for decodedRecipe in decodedResponse {
+                               if let index = recipes.firstIndex(where: { $0.id == decodedRecipe.recipe }) {
+                                   recipes[index].updateFavourite(to: true)
+
+                                   print(String(recipes[index].favourited) + " " + recipes[index].name)
+                               }
+                           }
+//
+//                        for i in 0..<decodedResponse.count{
+//                            for j in 0..<recipes.count{
+//                                if recipes[j].id == decodedResponse[i].recipe {
+//                                    var newR = recipes[j]
+//                                    newR.updateFavourite(to: true)
+//                                    recipes[j] = newR
+//                                    recipes[j].favourited = true
+//                                    print(String(recipes[j].favourited) + " " + recipes[j].name)
+//                                    break
+//                                }
 //                            }
-                        }
+//                        }
+                        
+                        print(recipes.filter{ $0.favourited == true}.count)
                     }
                 } catch {
                     print("Failed to decode JSON: \(error.localizedDescription)")
