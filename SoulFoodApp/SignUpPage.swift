@@ -9,10 +9,10 @@ import SwiftUI
 
 struct SignUpPage: View {
     
-    @State private var username: String = ""
-    @State private var email : String = ""
-    @State private var password: String = ""
-    @State private var repeatedPW: String = ""
+    @State private var username: String = "test"
+    @State private var email : String = "abc@gmail.com"
+    @State private var password: String = "abc123@AB"
+    @State private var repeatedPW: String = "abc123@AB"
      
     
     @State private var unError: Bool = false;
@@ -210,6 +210,36 @@ struct SignUpPage: View {
         
         repeatedPWError = password != repeatedPW
         print("Password: \(password), repeated password: \(repeatedPW), hence its \(repeatedPWError)")
+         
+        
+        var request = TokenManager.shared.wrappedRequest(sendReq: TokenManager.shared.root + "/auth/users/")
+        request.httpMethod = "POST"
+  
+        let json: [String: String] = ["username": username,
+                                   "password" : password,
+                                      "email" : email]
+
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        request.httpBody = jsonData
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data{
+                do{
+                    print(data)
+//                    let decodedResponse = try JSONDecoder().decode([RecipeFavourite].self, from: data)
+                    DispatchQueue.main.async{
+                        
+                       
+                    }
+                } catch {
+                    print("Failed to decode JSON: \(error.localizedDescription)")
+                }
+                return
+            }
+            
+        }
+        .resume()
+
         // check if the email's used
         // check if email's following [aaa]@[aa].[aa]
         // check if pw is strong?

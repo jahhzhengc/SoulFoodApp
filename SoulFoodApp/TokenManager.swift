@@ -13,9 +13,9 @@ class TokenManager {
     
     private let tokenKey = "auth_token"
 
-//    let root: String = "http://127.0.0.1:8000"
+    let root: String = "http://127.0.0.1:8000"
     
-    let root: String = "http://192.168.1.7:8000"
+//    let root: String = "http://192.168.100.112:8000"
     
     func saveToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: tokenKey)
@@ -34,7 +34,10 @@ class TokenManager {
         var toReturn = URLRequest(url: url)
         toReturn.addValue("application/json", forHTTPHeaderField: "Content-Type")
         toReturn.addValue("application/json", forHTTPHeaderField: "Accept")
-        toReturn.setValue("Token \(getToken() ?? "")", forHTTPHeaderField: "Authorization")
+//        print(getToken())
+        if((getToken()?.isEmpty) != nil){
+            toReturn.setValue("Token \(getToken() ?? "")", forHTTPHeaderField: "Authorization")
+        }
         return toReturn
     }
 }
