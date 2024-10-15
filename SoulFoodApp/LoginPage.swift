@@ -13,6 +13,7 @@ struct LoginPage: View {
     @State private var password: String = ""
     @State private var isLoggedIn: Bool = false
     
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
 //        if loggedIn() {
 //            Text("Welcome, \(username)!")
@@ -73,7 +74,7 @@ struct LoginPage: View {
                     .font(.footnote)
                     .padding(.top)
                     
-                    
+                    Spacer()
                 }
                 .padding(.horizontal)
                 .onAppear{
@@ -87,6 +88,8 @@ struct LoginPage: View {
      
     func login() {
         print ("login")
+        
+        self.presentationMode.wrappedValue.dismiss()
         guard let url = URL(string: "http://127.0.0.1:8000/api/login/") else { return }
 
         var request = URLRequest(url: url)

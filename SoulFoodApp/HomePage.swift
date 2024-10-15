@@ -11,7 +11,7 @@ struct HomePage: View {
     @State private var selectedTab = 1
     
     var body: some View {
-        TabView (selection: $selectedTab)
+        TabView
         {
             RecipesList()
                 .tabItem {
@@ -23,7 +23,10 @@ struct HomePage: View {
                     Label("Profile", systemImage: "person.circle")
                 }
         }
-        
+//        .onChange(of: selectedTab) { oldValue, newValue in
+//            print(oldValue)
+//            print(newValue)
+//        }
     }
 }
 

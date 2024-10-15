@@ -79,6 +79,8 @@ struct ProfilePage: View {
             
             .sheet(isPresented: $showSheet) {
                 LoginPage()
+                    .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
+                    .presentationDragIndicator(.visible) 
             }
         }
     }
