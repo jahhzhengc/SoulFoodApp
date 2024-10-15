@@ -62,16 +62,13 @@ struct LoginPage: View {
                     HStack (alignment: .center){
                         
                         Text("Dont have an account?")
-                        
                         NavigationLink{
                             SignUpPage()
                                 .navigationTitle("Register a new account")
                                 .navigationBarTitleDisplayMode(.inline)
                         }label:{
                             Text("Sign up")
-                                .frame(maxWidth: .infinity)
-                        }
-//                        Spacer()
+                        } 
                     }
                     .font(.footnote)
                     .padding(.top)

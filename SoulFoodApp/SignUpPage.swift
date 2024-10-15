@@ -179,6 +179,17 @@ struct SignUpPage: View {
                    
                     
                 }
+                HStack(spacing: 0){
+                    Text("By signing up you agree to our ") +
+                    Text("Terms and Conditions ")
+                        .foregroundStyle(.blue) +
+                    Text("and ") +
+                    Text("Privacy Policy")
+                        .foregroundStyle(.blue)
+                }
+                .font(.caption2)
+                .padding(.top)
+                
                 Button(action: signUp) {
                     Text("Sign up")
                 }
@@ -186,17 +197,18 @@ struct SignUpPage: View {
                 .disabled(username.isEmpty || password.isEmpty || email.isEmpty || repeatedPW.isEmpty)
                 .padding()
                  
-                HStack{
-                    Text("Already have an account?")
+                HStack (spacing: 0){
+                    Text("Already have an account? ")
                     Button{
                         print("Loggin")
-                        
                         self.presentationMode.wrappedValue.dismiss()
                     }label:{
                         Text("Login")
                     }
                 }
                 .font(.footnote)
+                
+               
             }
         }
     }

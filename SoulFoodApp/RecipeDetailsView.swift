@@ -40,8 +40,10 @@ struct RecipeDetailsView: View {
                 ProgressView()
             }
             .overlay(alignment: .topTrailing){
-                favouriteBtn
-                    .frame(alignment: .leading)
+                if(TokenManager.shared.loggedIn()){
+                    favouriteBtn
+                        .frame(alignment: .leading)
+                }
             }
             .clipped()
             .overlay{
@@ -68,14 +70,16 @@ struct RecipeDetailsView: View {
                 .fontWeight(.ultraLight)
                 .padding()
             
-            if(recipeDetails.options.count > 0){
-                addOnSection
-            }
-            
-            customStepper
-            
-            if(num > 0){
-                addToCartBtn
+            if(TokenManager.shared.loggedIn()){
+                if(recipeDetails.options.count > 0){
+                    addOnSection
+                }
+                
+                customStepper
+                
+                if(num > 0){
+                    addToCartBtn
+                }
             }
         }
         .toastView(toast: $toast)
