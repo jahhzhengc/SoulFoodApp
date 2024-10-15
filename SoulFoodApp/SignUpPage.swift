@@ -28,6 +28,7 @@ struct SignUpPage: View {
     @FocusState var focus: FocusedField?
     @FocusState var lastFocus : FocusedField?
     @State private var errorMsg : String = "BIG TEST"
+    @Environment(\.presentationMode) var presentationMode
     enum FocusedField:Hashable{
         case name, email, password, repeatedPW
     }
@@ -40,7 +41,6 @@ struct SignUpPage: View {
                     Text("Username:")
                         .font(.caption2)
                         .foregroundStyle(unError ? Color.red : Color.black)
-                        .padding(.horizontal)
                     
                     TextField("A unique username", text: $username)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -48,19 +48,17 @@ struct SignUpPage: View {
                         .autocorrectionDisabled()
                         .modifier(TextFieldErrorModifier(hasError: unError))
                         .focused($focus, equals: .name)
-                        .padding(.horizontal)
 
                     if unError{
                         Text(unErrorMsg)
                             .foregroundStyle(unError ? Color.red : Color.black)
                             .font(.caption2)
-                            .padding(.horizontal)
                     }
                     
                     Text("E-mail:")
                         .font(.caption2)
                         .foregroundStyle(emailError ? Color.red : Color.black)
-                        .padding([.top, .horizontal])
+                        .padding(.top)
                     
                     TextField("E.g: hello@gmail.com", text: $email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -68,20 +66,18 @@ struct SignUpPage: View {
                         .autocorrectionDisabled()
                         .modifier(TextFieldErrorModifier(hasError: emailError))
                         .focused($focus, equals: .email)
-                        .padding(.horizontal)
 
                     
                     if emailError{
                         Text(emailErrorMsg)
                             .foregroundStyle(emailError ? Color.red : Color.black)
                             .font(.caption2)
-                            .padding(.horizontal)
                     }
                     
                     Text("Password:")
                         .font(.caption2)
                         .foregroundStyle(pwError ? Color.red : Color.black)
-                        .padding([.top, .horizontal])
+                        .padding(.top)
                      
                     SecureField("Password", text: $password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -89,19 +85,17 @@ struct SignUpPage: View {
                         .autocorrectionDisabled()
                         .modifier(TextFieldErrorModifier(hasError: pwError))
                         .focused($focus, equals: .password)
-                        .padding(.horizontal)
                     
                     if pwError{
                         Text(pwErrorMsg)
                             .foregroundStyle(pwError ? Color.red : Color.black)
                             .font(.caption2)
-                            .padding(.horizontal)
                     }
                     
                     Text("Type password again:")
                         .font(.caption2)
                         .foregroundStyle( repeatedPWError ? Color.red : Color.black)
-                        .padding([.top, .horizontal])
+                        .padding(.top)
                     
                     SecureField("Type password again", text: $repeatedPW)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -109,17 +103,16 @@ struct SignUpPage: View {
                         .autocorrectionDisabled()
                         .modifier(TextFieldErrorModifier(hasError: repeatedPWError))
                         .focused($focus, equals: .repeatedPW)
-                        .padding(.horizontal)
                     
                     
                     if repeatedPWError{
                         Text(repeatedPWErrorMsg)
                             .foregroundStyle(repeatedPWError ? Color.red : Color.black)
                             .font(.caption2)
-                            .padding(.horizontal)
                     }
                     
                 }
+                .padding(.horizontal)
                 .onChange(of: focus){ oldValue, newValue in
                     // on focus
                     switch(newValue!)
@@ -189,9 +182,21 @@ struct SignUpPage: View {
                 Button(action: signUp) {
                     Text("Sign up")
                 }
-                .buttonStyle(BorderedButtonStyle())
+                .buttonStyle(.borderedProminent)
+                .disabled(username.isEmpty || password.isEmpty || email.isEmpty || repeatedPW.isEmpty)
                 .padding()
                  
+                HStack{
+                    Text("Already have an account?")
+                    Button{
+                        print("Loggin")
+                        
+                        self.presentationMode.wrappedValue.dismiss()
+                    }label:{
+                        Text("Login")
+                    }
+                }
+                .font(.footnote)
             }
         }
     }
@@ -200,6 +205,7 @@ struct SignUpPage: View {
         
     }
     private let EMAIL_REGEX: String = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+    
     private let PW_REGEX: String = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$";
     func signUp(){
         

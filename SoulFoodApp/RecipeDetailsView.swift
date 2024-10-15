@@ -21,6 +21,8 @@ struct RecipeDetailsView: View {
     @State var favourited: Bool = false
     
     @State private var toast: Toast? = nil
+    @AppStorage("auth_token") private var token : String = ""
+
     var body: some View {
          
         ScrollView(.vertical, showsIndicators: false){

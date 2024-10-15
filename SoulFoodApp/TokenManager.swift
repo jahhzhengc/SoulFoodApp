@@ -12,9 +12,9 @@ class TokenManager {
     static let shared = TokenManager()
     
     private let tokenKey = "auth_token"
+    @AppStorage("auth_token") private var token : String = ""
 
     let root: String = "http://127.0.0.1:8000"
-    
 //    let root: String = "http://192.168.100.112:8000"
     
     func saveToken(_ token: String) {
@@ -30,14 +30,19 @@ class TokenManager {
     }
     
     func wrappedRequest(sendReq: String) -> URLRequest{
-        let url = URL(string: sendReq)! // force unwrapped it, probably not a good idea
+        let url = URL(string: sendReq)!
         var toReturn = URLRequest(url: url)
         toReturn.addValue("application/json", forHTTPHeaderField: "Content-Type")
         toReturn.addValue("application/json", forHTTPHeaderField: "Accept")
-//        print(getToken())
+        // sending empty Token gives error, if its unauthenticated user, just keep this field empty
         if((getToken()?.isEmpty) != nil){
             toReturn.setValue("Token \(getToken() ?? "")", forHTTPHeaderField: "Authorization")
         }
         return toReturn
     }
+    
+    func loggedIn ()-> Bool {
+        return !token.isEmpty
+    }
+     
 }

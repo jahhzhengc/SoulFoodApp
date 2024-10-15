@@ -12,29 +12,84 @@ struct LoginPage: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var isLoggedIn: Bool = false
-
+    
     var body: some View {
-        if isLoggedIn {
-            Text("Welcome, \(username)!")
-        } else {
-            VStack {
-                TextField("Username", text: $username)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                Button(action: login) {
+//        if loggedIn() {
+//            Text("Welcome, \(username)!")
+//        } else {
+            NavigationView {
+                VStack (alignment: .leading){
                     Text("Login")
+                        .padding(.vertical)
+                        .font(.title3)
+                        .bold()
+                    
+                    Text("Username: ")
+                        .font(.caption2)
+                        .padding(.top)
+                    
+                    TextField("Username", text: $username)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textInputAutocapitalization(.never)
+                    
+                    Text("Password: ")
+                        .font(.caption2)
+                        .padding(.top)
+                    
+                    SecureField("Password", text: $password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    
+                    NavigationLink{
+                        ForgotPassword()
+                            .navigationTitle("Forgot password")
+                            .navigationBarTitleDisplayMode(.inline)
+                    }label:{
+                        Text("Forgot password")
+                            .font(.footnote)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .padding(.top)
+                    }
+                    
+                    Button(action: login) {
+                        Text("Sign in")
+                            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+                    }
+                    .disabled(username.isEmpty || password.isEmpty)
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top)
+                    
+                     
+                    HStack (alignment: .center){
+                        
+                        Text("Dont have an account?")
+                        
+                        NavigationLink{
+                            SignUpPage()
+                                .navigationTitle("Register a new account")
+                                .navigationBarTitleDisplayMode(.inline)
+                        }label:{
+                            Text("Sign up")
+                                .frame(maxWidth: .infinity)
+                        }
+//                        Spacer()
+                    }
+                    .font(.footnote)
+                    .padding(.top)
+                    
+                    
                 }
-                .padding()
-            }
+                .padding(.horizontal)
+                .onAppear{
+                    username = ""
+                    password = ""
+//                    print("test")
+                }
         }
     }
-
+     
+     
     func login() {
+        print ("login")
         guard let url = URL(string: "http://127.0.0.1:8000/api/login/") else { return }
 
         var request = URLRequest(url: url)
