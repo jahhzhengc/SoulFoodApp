@@ -23,6 +23,10 @@ struct Recipe: Codable, Identifiable, Equatable {
     }
     
     var favourited: Bool = false
+    mutating func updateFavourite(to newFavourite: Bool){
+        favourited = newFavourite
+        print(String(favourited) + " " + name)
+    }
     enum CodingKeys: String, CodingKey {
         case id, name, desc, price, availability, media_file, category, options
     }
@@ -69,6 +73,18 @@ struct Recipe: Codable, Identifiable, Equatable {
         category = try container.decode(Category.self, forKey: .category)
         options = try container.decode([Option].self, forKey: .options)
     }
+    
+    init(newRecipe: Recipe, favourite: Bool){
+       self.id = newRecipe.id
+       self.name = newRecipe.name
+       self.desc = newRecipe.desc
+       self.price = newRecipe.price
+       self.media_file = newRecipe.media_file
+       self.availability = newRecipe.availability
+       self.category = newRecipe.category
+       self.options = newRecipe.options
+        self.favourited = favourite
+   }
     
     func parsedPrice()->String{
         return "$ " + String(format: "%.2f", self.price)

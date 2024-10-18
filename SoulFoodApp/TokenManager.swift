@@ -14,8 +14,8 @@ class TokenManager {
     private let tokenKey = "auth_token"
     @AppStorage("auth_token") private var token : String = ""
 
-    let root: String = "http://127.0.0.1:8000"
-//    let root: String = "http://192.168.100.112:8000"
+//    let root: String = "http://127.0.0.1:8000"
+    let root: String = "http://192.168.100.112:8000"
     
     func saveToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: tokenKey)
