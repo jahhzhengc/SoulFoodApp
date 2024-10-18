@@ -113,7 +113,9 @@ struct RecipeDetailsView: View {
                 .foregroundStyle(.yellow.gradient)
             
         }.onAppear{
-            loadRecipeFavourite()
+            if(TokenManager.shared.loggedIn()){
+                loadRecipeFavourite()
+            }
         }
     }
     func setRecipeFavourite(){
