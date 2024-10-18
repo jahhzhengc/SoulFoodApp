@@ -44,25 +44,26 @@ struct ForgotPassword: View {
                   CodeBox(text: $code[index])
                       .focused($focusedField, equals: index) // Track the focused field
                       .onChange(of: code[index]) { oldValue, newValue in
-//                          let cmp = (oldValue.count - newValue.count)
-//                          if(cmp < 0){
-////                              focusedField = max(index + 1, 5)
-//                          }else{
-////                              focusedField =
-//                          }
-//                          print(cmp)
-                          print("oldValue: [\(oldValue)]")
-                          print("newValue: [\(newValue)] && \(newValue.isEmpty)")
-                          textChange(newValue: newValue, index: index)
-////                          if(newValue == oldValue)
-//                          if(newValue.isEmpty && index > 0){
-//                              code[index] = "\u{200B}" // Reset the previous field
-//                              focusedField = index - 1
-//                              print("moved")
-//                          }else{
-//                              moveToEmptyField()
-//                          }
-//                          handleTextChange(newValue: newValue, index: index)
+                          
+                          
+                          // means a backspace detected
+                          if(newValue.isEmpty){
+                              if(index > 0){
+                                  focusedField = index - 1
+                              }
+                              // just hard set the indexes onward with empty white space
+                              for j in index...5 {
+                                  code[j] = "\u{200B}"
+                              }
+                              
+                              // hard reset the index -1 to empty white space
+                              if(index - 1 > -1){
+                                  code[index - 1] = "\u{200B}"
+                              }
+                          }
+                          else{
+                              moveToEmptyField()
+                          }
                       }
                       .onTapGesture {
                           moveToEmptyField() // Ensure the focus is always on the empty field
@@ -83,39 +84,15 @@ struct ForgotPassword: View {
     func pressed(){
         
     }
-    
-    func textChange(newValue: String, index: Int){
-        if(index > 0){
-            if(newValue.isEmpty ){
-                //            code[index] = "\u{200B}" // Reset the previous field
-                focusedField = index - 1
-                print("moved")
-            }else{
-                //            let nextIndex = index + 1
-                //            code[nextIndex] = "\u{200B}"
-                moveToEmptyField()
-            }
-        }
-    }
-    private func handleTextChange(newValue: String, index: Int) {
-        // basically, they're all defaulted with a Zero Width space and also my index is defaulted to 0
-        //
-        if index > 0 && code[index].isEmpty {
-            // If backspace detected in an empty field, move focus to the previous field
-            focusedField = index - 1
-            code[index] = "\u{200B}" // Reset the previous field
-        } else if newValue.count == 1 && newValue != "\u{200B}" {
-            // Move to the next box if a single character is entered and it's not the zero-width space
-            focusedField = min(index + 1, 5)
-        }
-    }
+     
     private let EMAIL_REGEX: String = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
     
     private func moveToEmptyField() {
-        if let firstEmptyIndex = code.firstIndex(where: { $0 == "\u{200B}" }) {
+        if let firstEmptyIndex = code.firstIndex(where: { $0.count < 2 }) {
             focusedField = firstEmptyIndex
-            print("Found")
+            print("Found \(firstEmptyIndex)")
         }else{
+            
             print("nah")
         }
     }
@@ -147,16 +124,21 @@ struct CodeBox: View {
                 // Ensure zero-width space is set on appear
                 if text.isEmpty {
                     text = "\u{200B}"
-                    print("overrides!")
                 }
             }
-//            .onReceive(Just(text)) { _ in
-//                print(text)
-//                if text.count > 1 {
-//                    text = String(text.prefix(1))
+            // just limit characters to number and zero-width space
+            .onReceive(Just(text)) { newValue in
+//                print(text.count)
+                if text.count > 2 {
+                    text = String(text.prefix(2))
+                }
+//                let filtered = newValue.filter { "\u{200B}0123456789".contains($0) }
+//                if(filtered != newValue){
+//                    
 //                }
-//                
-//            }
+//                print(filtered.count)
+//                if(text.)
+            }
     }
 }
 

@@ -35,7 +35,7 @@ struct SignUpPage: View {
     var body: some View {
         ZStack{
 //            Color.gray.opacity(0.5)
-            VStack{
+            ScrollView{
                 VStack (alignment: .leading){
                     
                     Text("Username:")
