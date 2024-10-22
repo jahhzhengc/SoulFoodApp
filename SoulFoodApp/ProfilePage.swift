@@ -9,8 +9,10 @@ import SwiftUI
 
 struct ProfilePage: View {
     @State private var showSheet = false
+    
+    @ObservedObject var tokenManager = TokenManager.shared
     var body: some View {
-        if(TokenManager.shared.loggedIn()){
+        if(tokenManager.loggedIn()){
             List{
                 Section(header: Text("General")
                     .font(.subheadline)
@@ -80,12 +82,21 @@ struct ProfilePage: View {
             .sheet(isPresented: $showSheet) {
                 LoginPage()
                     .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
-                    .presentationDragIndicator(.visible) 
+                    .presentationDragIndicator(.visible)
             }
         }
     }
     func logOut(){
-        print("logged out")
+        
+        let url = tokenManager.root + "/auth/token/logout/"
+        var request = tokenManager.wrappedRequest(sendReq: url)
+        request.httpMethod = "POST"
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                tokenManager.removeToken()
+                print("token removed!")
+            }
+        }.resume()
     }
 }
 
