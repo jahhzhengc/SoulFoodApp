@@ -22,6 +22,9 @@ struct RecipeDetailsView: View {
     
     @State private var toast: Toast? = nil
     @AppStorage("auth_token") private var token : String = ""
+    
+    
+    @ObservedObject var tokenManager = TokenManager.shared
 
     var body: some View {
          
@@ -40,7 +43,7 @@ struct RecipeDetailsView: View {
                 ProgressView()
             }
             .overlay(alignment: .topTrailing){
-                if(TokenManager.shared.loggedIn()){
+                if(tokenManager.loggedIn()){
                     favouriteBtn
                         .frame(alignment: .leading)
                 }
@@ -70,7 +73,7 @@ struct RecipeDetailsView: View {
                 .fontWeight(.ultraLight)
                 .padding()
             
-            if(TokenManager.shared.loggedIn()){
+            if(tokenManager.loggedIn()){
                 if(recipeDetails.options.count > 0){
                     addOnSection
                 }
@@ -113,15 +116,15 @@ struct RecipeDetailsView: View {
                 .foregroundStyle(.yellow.gradient)
             
         }.onAppear{
-            if(TokenManager.shared.loggedIn()){
+            if(tokenManager.loggedIn()){
                 loadRecipeFavourite()
             }
         }
     }
     func setRecipeFavourite(){
-        let url = TokenManager.shared.root + "/api/favourites/"
+        let url = tokenManager.root + "/api/favourites/"
         
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: url)
           
         let json: [String: Any] = ["recipe_id": recipeDetails.id]
 
@@ -147,9 +150,9 @@ struct RecipeDetailsView: View {
     }
     
     func removeRecipeFavourite(){
-        let url = TokenManager.shared.root + "/api/favourites/\(recipeDetails.id)"
+        let url = tokenManager.root + "/api/favourites/\(recipeDetails.id)"
         
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: url)
            
         request.httpMethod = "DELETE"
         
@@ -170,10 +173,9 @@ struct RecipeDetailsView: View {
     }
     
     func loadRecipeFavourite() {
-        let url = TokenManager.shared.root + "/api/favourites/\(recipeDetails.id)"
+        let url = tokenManager.root + "/api/favourites/\(recipeDetails.id)"
         
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
-        request.httpMethod = "GET"
+        var request = tokenManager.wrappedRequest(sendReq: url)
           
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

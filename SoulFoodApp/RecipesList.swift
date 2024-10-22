@@ -11,7 +11,8 @@ struct RecipesList: View {
     @StateObject private var cart = Cart()
     
     @State private var categories = [Category] ()
-
+    
+    @ObservedObject var tokenManager = TokenManager.shared
 //    var groupedRecipes: [String: String] = []
     
 //            List(searchedRecipes, id: \.id) { recipe in
@@ -59,10 +60,10 @@ struct RecipesList: View {
 //                .padding(10)
 //            }
 //            ScrollViewReader { proxy in
+            VStack{
                 List{
                     ForEach(categories, id: \.self){ category in
-                        if let recipes = groupedRecipes[category], !recipes.isEmpty {
-//                            Section(header: Text(category.name).font(.headline).id(category.id)) {
+                        if let recipes = groupedRecipes[category], !recipes.isEmpty { 
                             Section(header: Text(category.name).font(.headline).id(category.id)) {
                                 ForEach(groupedRecipes[category] ?? []) { recipe in
                                     NavigationLink{
@@ -77,7 +78,8 @@ struct RecipesList: View {
                         }
                     }
                 }
-                .listStyle(PlainListStyle())
+                .listStyle(SidebarListStyle())
+                //                .listStyle(PlainListStyle())
                 .navigationTitle("Menu")
                 .navigationBarTitleDisplayMode(.automatic)
                 .searchable(text: $searchQuery, prompt: "Search for recipes")
@@ -86,12 +88,12 @@ struct RecipesList: View {
                     // if I'm searching something, but its returning nothing
                     if !searchQuery.isEmpty && groupedRecipes.isEmpty{
                         ContentUnavailableView(
-                                 "Product not available",
-                                 systemImage: "magnifyingglass",
-                                 description: Text("No results for \(searchQuery)")
-                             )
+                            "Product not available",
+                            systemImage: "magnifyingglass",
+                            description: Text("No results for \(searchQuery)")
+                        )
                         
-                    
+                        
                     }
                 }
                 .overlay(alignment: .bottomTrailing){
@@ -106,14 +108,14 @@ struct RecipesList: View {
                     .disabled(cart.items.count < 1)
                 }
                 .toolbar{
-                    Button{ 
+                    Button{
                         showFavourite.toggle()
                     }label:{
                         Label("test", systemImage: showFavourite ? "star.fill" : "star")
                     }
                 }
-//                .background(.red)
-//                .padding(.vertical)
+                .navigationViewStyle(StackNavigationViewStyle())
+            }
 //                .onChange(of: selectedCategory) { category in
 //                    // Scroll to the selected category section
 //                    print(category)
@@ -183,7 +185,7 @@ struct RecipesList: View {
         return toReturn
     }
     func loadRecipes() {
-        guard let url = URL(string: TokenManager.shared.root + url) else {
+        guard let url = URL(string: tokenManager.root + url) else {
             print("Invalid URL")
             return
         }
@@ -215,7 +217,7 @@ struct RecipesList: View {
     
     @State private var recipeFavourites = [Int]()
     func loadFavourites(){
-        let request = TokenManager.shared.wrappedRequest(sendReq: TokenManager.shared.root + "/api/favourites/")
+        let request = tokenManager.wrappedRequest(sendReq: tokenManager.root + "/api/favourites/")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data{
