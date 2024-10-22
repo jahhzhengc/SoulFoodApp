@@ -36,12 +36,15 @@ struct ManagerUIOnly: View {
     
     let loginURL = "http://127.0.0.1:8000/auth/token/login/"
     func logIn(){
-        guard let url = URL(string: loginURL) else { return }
-        
-        var request = URLRequest(url: url)
+//        guard let url = URL(string: loginURL) else { return }
+//        
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let url = TokenManager.shared.root + "/auth/token/login/"
+        var request = TokenManager.shared.wrappedRequest(sendReq: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-  
+        
         let json: [String: String] = self.manager ?
             ["username": "manager", "password" : "manage.rial1257"]:
             ["username": "test2", "password" : "vveegeer32"]
@@ -95,7 +98,9 @@ struct ManagerUIOnly: View {
 //            return
 //        }
 //        var request = URLRequest(url: url)
-        let url = "http://127.0.0.1:8000/auth/token/logout/"
+        
+        let url = TokenManager.shared.root + "/auth/token/logout/"
+//        let url = "http://127.0.0.1:8000/auth/token/logout/"
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
         request.httpMethod = "POST"
 //
@@ -115,9 +120,10 @@ struct ManagerUIOnly: View {
 //            print("Invalid URL")
 //            return
 //        }
-        let url = "http://127.0.0.1:8000/api/manager/"
+//        let url = "http://127.0.0.1:8000/api/manager/"
+        let url = TokenManager.shared.root + "/api/manager/"
         var request = TokenManager.shared.wrappedRequest(sendReq: url)
-        request.httpMethod = "GET"
+//        request.httpMethod = "GET"
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class TokenManager {
+class TokenManager : ObservableObject {
     static let shared = TokenManager()
     
     private let tokenKey = "auth_token"
