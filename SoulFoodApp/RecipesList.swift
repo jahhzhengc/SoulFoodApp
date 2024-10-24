@@ -78,8 +78,8 @@ struct RecipesList: View {
                         }
                     }
                 }
-                .listStyle(SidebarListStyle())
-                //                .listStyle(PlainListStyle())
+//                .listStyle(SidebarListStyle())
+                .listStyle(PlainListStyle())
                 .navigationTitle("Menu")
                 .navigationBarTitleDisplayMode(.automatic)
                 .searchable(text: $searchQuery, prompt: "Search for recipes")
@@ -91,9 +91,7 @@ struct RecipesList: View {
                             "Product not available",
                             systemImage: "magnifyingglass",
                             description: Text("No results for \(searchQuery)")
-                        )
-                        
-                        
+                        ) 
                     }
                 }
                 .overlay(alignment: .bottomTrailing){

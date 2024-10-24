@@ -27,7 +27,11 @@ struct CartDisplay: View {
     @State private var promoCode: String = ""
     
     @State private var toast: Toast? = nil
+    
     @FocusState private var isFocused: Bool
+    
+    @ObservedObject var tokenManager = TokenManager.shared
+    
     let flatDeliveryFee : Double = 3.59
     var body: some View {
         
@@ -73,7 +77,7 @@ struct CartDisplay: View {
                         Task{
                           await   searchPromoCode()
                         }
-//                        TokenManager.shared.wrappedRequest(sendReq: <#T##String#>)
+//                       tokenManager.wrappedRequest(sendReq: <#T##String#>)
                         print("TextField focus removed")
                     }
                 })
@@ -158,8 +162,8 @@ struct CartDisplay: View {
             return
         }
                                      //        api/promocode_used/code?=ABCDE
-        let url = TokenManager.shared.root + "/api/promocode_used/?code=" + promoCode
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        let url = tokenManager.root + "/api/promocode_used/?code=" + promoCode
+        var request = tokenManager.wrappedRequest(sendReq: url)
            
         request.httpMethod = "POST"
         
@@ -185,9 +189,9 @@ struct CartDisplay: View {
             code = PromoCode()
             return
         }
-        let url = TokenManager.shared.root + "/api/ars/promocodes/search/?code=" + promoCode
+        let url = tokenManager.root + "/api/ars/promocodes/search/?code=" + promoCode
             //    http://127.0.0.1:8000/api/ars/promocodes/search/?code=ABCDE
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: url)
            
         request.httpMethod = "GET"
         

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct HomePage: View {
-    @State private var selectedTab = 1
     
     var body: some View {
         TabView
@@ -22,11 +21,7 @@ struct HomePage: View {
                 .tabItem {
                     Label("Profile", systemImage: "person.circle")
                 }
-        }
-//        .onChange(of: selectedTab) { oldValue, newValue in
-//            print(oldValue)
-//            print(newValue)
-//        }
+        } 
     }
 }
 
