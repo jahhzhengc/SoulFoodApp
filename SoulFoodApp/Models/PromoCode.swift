@@ -48,7 +48,16 @@ extension DateFormatter {
         formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures correct date formatting
         return formatter
     }()
-} 
+    
+    static let yearMonthDayHourMinSec: DateFormatter = {
+        let formatter = DateFormatter()
+        
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = TimeZone.current  // Set to the device's curre
+        formatter.locale = Locale(identifier: "en_US_POSIX") // Ensures correct date formatting
+        return formatter
+    }()
+}
 // type = models.CharField(max_length= 100)
 // expiry_date = models.DateField()
 // code = models.CharField(max_length = 100, unique= True)

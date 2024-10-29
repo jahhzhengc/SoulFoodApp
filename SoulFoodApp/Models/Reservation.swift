@@ -23,8 +23,7 @@ struct Reservation :Codable{
         numOfPeople = try container.decode(Int.self, forKey: .numOfPeople)
         
         let dateString = try container.decode(String.self, forKey: .reservationDateTime)
-
-        guard let date = DateFormatter.yearMonthDay.date(from: dateString) else {
+        guard let date = DateFormatter.yearMonthDayHourMinSec.date(from: dateString) else {
             throw DecodingError.dataCorruptedError(forKey: .reservationDateTime,
                                                   in: container,
                                                   debugDescription: "Date string does not match format YYYY-MM-DD")
