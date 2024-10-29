@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomePage: View {
-    
+    @ObservedObject var tokenManager = TokenManager.shared
     var body: some View {
         TabView
         {
@@ -21,7 +21,14 @@ struct HomePage: View {
                 .tabItem {
                     Label("Profile", systemImage: "person.circle")
                 }
-        } 
+            
+            if(tokenManager.loggedIn()){
+                ReservationView()
+                    .tabItem{
+                        Label("Reservation", systemImage: "book.pages")
+                    }
+            }
+        }
     }
 }
 

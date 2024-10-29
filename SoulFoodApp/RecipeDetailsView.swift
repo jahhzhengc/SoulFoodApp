@@ -108,11 +108,9 @@ struct RecipeDetailsView: View {
                     
                     if(favourited){
                         toast = Toast(style: .success, message: "This menu item is now added to your favourite list.")
-//                        removeRecipeFavourite()
                     }
                     else{
                         toast = Toast(style: .error, message: "This menu item is now removed from your favourite list.")
-//                        setRecipeFavourite()
                         
                     }
                 }
@@ -161,7 +159,6 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
-//                  favourited = true
               return
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
@@ -183,7 +180,6 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
-//                  favourited = false
               return
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
@@ -203,7 +199,7 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
-                originalFavourited = true
+                    originalFavourited = true
                   favourited = true
               return
             }
