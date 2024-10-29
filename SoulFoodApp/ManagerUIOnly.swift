@@ -11,6 +11,7 @@ struct ManagerUIOnly: View {
     @State private var manager : Bool = true
     let authTokenString = "auth_token"
     
+    @ObservedObject var tokenManager = TokenManager.shared
     @AppStorage("auth_token") private var token : String = ""
     var body: some View {
         VStack{
@@ -37,8 +38,7 @@ struct ManagerUIOnly: View {
     func logIn(){
         
 //        ["username": "test2", "password" : "vveegeer32"]
-        let url = TokenManager.shared.root + "/auth/token/login/"
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: "/auth/token/login/")
         request.httpMethod = "POST"
         
         let json: [String: String] = self.manager ?
@@ -64,14 +64,14 @@ struct ManagerUIOnly: View {
                     
                     do {
                         let json = try JSONDecoder().decode(Token.self, from: data)
-                        TokenManager.shared.saveToken(json.auth_token)
+                        tokenManager.saveToken(json.auth_token)
                         print("HERE" ,json.auth_token!)
                     } catch {
                         print("didnt work")
                     }
 
                     // Retrieving the token
-                    if let token = TokenManager.shared.getToken() {
+                    if let token = tokenManager.getToken() {
                         print("Token retrieved: \(token)")
                     } else {
                         print("No token found")
@@ -95,15 +95,14 @@ struct ManagerUIOnly: View {
 //            return
 //        }
 //        var request = URLRequest(url: url)
-        
-        let url = TokenManager.shared.root + "/auth/token/logout/"
+         
 //        let url = "http://127.0.0.1:8000/auth/token/logout/"
-        var request = TokenManager.shared.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq:  "/auth/token/logout/")
         request.httpMethod = "POST"
 //
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
-                TokenManager.shared.removeToken()
+                tokenManager.removeToken()
             }
 //            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
@@ -117,9 +116,8 @@ struct ManagerUIOnly: View {
 //            print("Invalid URL")
 //            return
 //        }
-//        let url = "http://127.0.0.1:8000/api/manager/"
-        let url = TokenManager.shared.root + "/api/manager/"
-        let request = TokenManager.shared.wrappedRequest(sendReq: url)
+//        let url = "http://127.0.0.1:8000/api/manager/" 
+        let request = tokenManager.wrappedRequest(sendReq:  "/api/manager/")
 //        request.httpMethod = "GET"
         
         URLSession.shared.dataTask(with: request) { data, response, error in

@@ -86,10 +86,8 @@ struct ProfilePage: View {
             }
         }
     }
-    func logOut(){
-        
-        let url = tokenManager.root + "/auth/token/logout/"
-        var request = tokenManager.wrappedRequest(sendReq: url)
+    func logOut(){ 
+        var request = tokenManager.wrappedRequest(sendReq: "/auth/token/logout/")
         request.httpMethod = "POST"
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

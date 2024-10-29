@@ -2,7 +2,6 @@ import SwiftUI
 
 struct RecipesList: View {
     @State private var recipes = [Recipe]()
-    @State private var url = "/api/recipes"
     @State private var loaded : Bool = false
     
     @State private var isShowingSheet = false
@@ -91,7 +90,7 @@ struct RecipesList: View {
                             "Product not available",
                             systemImage: "magnifyingglass",
                             description: Text("No results for \(searchQuery)")
-                        ) 
+                        )
                     }
                 }
                 .overlay(alignment: .bottomTrailing){
@@ -183,11 +182,14 @@ struct RecipesList: View {
         return toReturn
     }
     func loadRecipes() {
-        guard let url = URL(string: tokenManager.root + url) else {
-            print("Invalid URL")
-            return
-        }
-        let request = URLRequest(url: url)
+//        guard let url = URL(string: url) else {
+//            print("Invalid URL")
+//            return
+//        }
+//        let request = URLRequest(url: url)
+        
+        let request = tokenManager.wrappedRequest(sendReq: "/api/recipes")
+//        var request ="/api/recipes"
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
               do {
@@ -215,7 +217,7 @@ struct RecipesList: View {
     
     @State private var recipeFavourites = [Int]()
     func loadFavourites(){
-        let request = tokenManager.wrappedRequest(sendReq: tokenManager.root + "/api/favourites/")
+        let request = tokenManager.wrappedRequest(sendReq: "/api/favourites")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data{

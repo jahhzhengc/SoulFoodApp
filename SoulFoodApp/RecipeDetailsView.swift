@@ -29,7 +29,7 @@ struct RecipeDetailsView: View {
     var body: some View {
          
         ScrollView(.vertical, showsIndicators: false){
-            AsyncImage(url: URL(string: TokenManager.shared.root + recipeDetails.media_file)) { image in
+            AsyncImage(url: tokenManager.wrappedPath(req: recipeDetails.media_file)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -122,9 +122,8 @@ struct RecipeDetailsView: View {
         }
     }
     func setRecipeFavourite(){
-        let url = tokenManager.root + "/api/favourites/"
         
-        var request = tokenManager.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: "/api/favourites/")
           
         let json: [String: Any] = ["recipe_id": recipeDetails.id]
 
@@ -150,9 +149,8 @@ struct RecipeDetailsView: View {
     }
     
     func removeRecipeFavourite(){
-        let url = tokenManager.root + "/api/favourites/\(recipeDetails.id)"
         
-        var request = tokenManager.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq:  "/api/favourites/\(recipeDetails.id)")
            
         request.httpMethod = "DELETE"
         
@@ -173,9 +171,8 @@ struct RecipeDetailsView: View {
     }
     
     func loadRecipeFavourite() {
-        let url = tokenManager.root + "/api/favourites/\(recipeDetails.id)"
         
-        var request = tokenManager.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: "/api/favourites/\(recipeDetails.id)")
           
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

@@ -230,7 +230,7 @@ struct SignUpPage: View {
         print("Password: \(password), repeated password: \(repeatedPW), hence its \(repeatedPWError)")
          
         
-        var request = TokenManager.shared.wrappedRequest(sendReq: TokenManager.shared.root + "/auth/users/")
+        var request = TokenManager.shared.wrappedRequest(sendReq: "/auth/users/")
         request.httpMethod = "POST"
   
         let json: [String: String] = ["username": username,

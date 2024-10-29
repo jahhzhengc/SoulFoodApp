@@ -162,8 +162,7 @@ struct CartDisplay: View {
             return
         }
                                      //        api/promocode_used/code?=ABCDE
-        let url = tokenManager.root + "/api/promocode_used/?code=" + promoCode
-        var request = tokenManager.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: "/api/promocode_used/?code=" + promoCode)
            
         request.httpMethod = "POST"
         
@@ -189,9 +188,8 @@ struct CartDisplay: View {
             code = PromoCode()
             return
         }
-        let url = tokenManager.root + "/api/ars/promocodes/search/?code=" + promoCode
             //    http://127.0.0.1:8000/api/ars/promocodes/search/?code=ABCDE
-        var request = tokenManager.wrappedRequest(sendReq: url)
+        var request = tokenManager.wrappedRequest(sendReq: "/api/ars/promocodes/search/?code=" + promoCode)
            
         request.httpMethod = "GET"
         

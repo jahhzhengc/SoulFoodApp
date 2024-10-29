@@ -14,7 +14,7 @@ struct RecipeView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing){
             HStack(alignment:.top){
-                AsyncImage(url: URL(string: tokenManager.root + recipeDetails.media_file)) { image in
+                AsyncImage(url: tokenManager.wrappedPath(req: recipeDetails.media_file)) { image in
                         applyModifiers(to: image)
                     } placeholder: {
                         ProgressView()

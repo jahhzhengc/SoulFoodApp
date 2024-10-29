@@ -122,9 +122,8 @@ struct LoginPage: View {
     }
     
     func logIn(){
-         
-        let url = tokenManager.root + "/auth/token/login/"
-        var request = tokenManager.wrappedRequest(sendReq: url)
+          
+        var request = tokenManager.wrappedRequest(sendReq: "/auth/token/login/")
         request.httpMethod = "POST"
         
         let json: [String: String] = ["username": username, "password" : password];
