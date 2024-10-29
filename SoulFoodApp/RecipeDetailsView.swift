@@ -19,7 +19,7 @@ struct RecipeDetailsView: View {
     @State var index: UUID = UUID()
     
     @State var favourited: Bool = false
-    
+    @State var originalFavourited: Bool = false
     @State private var toast: Toast? = nil
     @AppStorage("auth_token") private var token : String = ""
     
@@ -104,13 +104,16 @@ struct RecipeDetailsView: View {
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 30)
                 .onTapGesture {
-//                    favourited.toggle()
+                    favourited.toggle()
+                    
                     if(favourited){
-                        removeRecipeFavourite()
+                        toast = Toast(style: .success, message: "This menu item is now added to your favourite list.")
+//                        removeRecipeFavourite()
                     }
                     else{
-                        setRecipeFavourite()
-                        toast = Toast(style: .success, message: "This menu item is now added to your favourite list.") 
+                        toast = Toast(style: .error, message: "This menu item is now removed from your favourite list.")
+//                        setRecipeFavourite()
+                        
                     }
                 }
                 .foregroundStyle(.yellow.gradient)
@@ -120,7 +123,24 @@ struct RecipeDetailsView: View {
                 loadRecipeFavourite()
             }
         }
+        .onDisappear{
+            print("Ondisappear")
+            if(tokenManager.loggedIn()){
+                if (originalFavourited != favourited){
+                    // if its originally false -> true, POST
+                    // if its originally true -> false, DELETE
+                    
+                    if(originalFavourited){
+                        removeRecipeFavourite()
+                    }
+                    else{
+                        setRecipeFavourite()
+                    }
+                }
+            }
+        }
     }
+    
     func setRecipeFavourite(){
         
         var request = tokenManager.wrappedRequest(sendReq: "/api/favourites/")
@@ -141,7 +161,7 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
-                  favourited = true
+//                  favourited = true
               return
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
@@ -163,7 +183,7 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
-                  favourited = false
+//                  favourited = false
               return
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
@@ -172,7 +192,7 @@ struct RecipeDetailsView: View {
     
     func loadRecipeFavourite() {
         
-        var request = tokenManager.wrappedRequest(sendReq: "/api/favourites/\(recipeDetails.id)")
+        let request = tokenManager.wrappedRequest(sendReq: "/api/favourites/\(recipeDetails.id)")
           
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
@@ -183,6 +203,7 @@ struct RecipeDetailsView: View {
                           return
                       }
                  }
+                originalFavourited = true
                   favourited = true
               return
             }
