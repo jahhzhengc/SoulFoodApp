@@ -10,7 +10,13 @@ import SwiftUI
 struct ProfilePage: View {
     @State private var showSheet = false
     
+    enum SheetEnum: String {
+        case birthday, language, login
+    };
+    @State private var currentEnum: SheetEnum = .login
+    
     @ObservedObject var tokenManager = TokenManager.shared
+     
     var body: some View {
         if(tokenManager.loggedIn()){
             List{
@@ -20,7 +26,12 @@ struct ProfilePage: View {
                     .foregroundStyle(.black)
                 ){
                     Text("Favourites") // ideally all the favourite recipes?
-                    Text("Language") // ideally integrate localisation
+//                    Text("Language") // ideally integrate localisation
+                    Button("Set my birthday"){
+                        showSheet = true
+                        currentEnum = .birthday
+                        print("IN")
+                    }
                     Text("Food reviews") // ideally they're allowed to drop feedback for ordered food
                     Text("Saved places") // ideally all the places thats stored
                 }
@@ -40,6 +51,20 @@ struct ProfilePage: View {
                 }
             }
             .listStyle(.grouped)
+            
+            
+            .sheet(isPresented: $showSheet) {
+//                print(currentEnum)
+                if (currentEnum == .birthday){
+                    
+                    SetBirthdayPage()
+                        .presentationDetents([.medium]) // Allows the sheet to be scrollable or full screen
+                        .presentationDragIndicator(.visible)
+                }
+            }
+            .onChange(of: currentEnum){ 
+                print(currentEnum)
+            }
         }else{
              
             List{
@@ -80,9 +105,13 @@ struct ProfilePage: View {
             .listStyle(.inset)
             
             .sheet(isPresented: $showSheet) {
-                LoginPage()
-                    .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
-                    .presentationDragIndicator(.visible)
+                if(currentEnum == .login){
+                    LoginPage()
+                        .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
+                        .presentationDragIndicator(.visible)
+                } else if (currentEnum == .birthday){
+                    Text("Set birthday")
+                }
             }
         }
     }

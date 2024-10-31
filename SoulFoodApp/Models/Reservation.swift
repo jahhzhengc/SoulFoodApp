@@ -8,7 +8,8 @@
 import Foundation
 //fields = ['user', 'reservationDateTime', 'status', 'numOfPeople']
 
-struct Reservation :Codable{
+struct Reservation :Codable , Identifiable{
+    let id = UUID()
     var user: Int
     var reservationDateTime : Date
     var status: Int
@@ -16,6 +17,7 @@ struct Reservation :Codable{
     enum CodingKeys: String, CodingKey {
         case user, reservationDateTime, status, numOfPeople
     }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         user = try container.decode(Int.self, forKey: .user)
@@ -29,6 +31,14 @@ struct Reservation :Codable{
                                                   debugDescription: "Date string does not match format YYYY-MM-DD")
         }
         reservationDateTime = date
+    }
+    
+    init(reservationDateTime: Date, status: Int, numOfPeople: Int){
+        self.numOfPeople = numOfPeople
+        self.status = status
+        self.reservationDateTime = reservationDateTime
+        self.user = -1
+        
     }
     
 }

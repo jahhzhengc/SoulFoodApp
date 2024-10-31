@@ -16,6 +16,8 @@ struct ReservationView: View {
     // or we can include things T&S like, we reserve the right to cancel your reservation without prior notice
     
     var dateFormatter = DateFormatter()
+    var onlyDateFormatter = DateFormatter()
+    var onlyTimeFormatter = DateFormatter()
     let tomorrow = Date.now.addingTimeInterval(60 * 60 * 24)
     let nextMonth = Date.now.addingTimeInterval(60 * 60 * 24 * 30) // 60s * 60mins * 24hrs * 30days LOL
     
@@ -25,8 +27,7 @@ struct ReservationView: View {
     }
     
     @ObservedObject var tokenManager = TokenManager.shared
-    @State private var selectedDate = Date.now
-    @State private var selectedTime = Date()
+    @State private var selectedDate: Date = Date.now.addingTimeInterval(-60 * 60 * 24)
 
     // limit the hours for time picker, cause there's Opening Hours
     var getTime: some View {
@@ -37,75 +38,153 @@ struct ReservationView: View {
            return DatePicker("Selected Time", selection: $selectedDate,
                              in: startTime...endTime,
                              displayedComponents: .hourAndMinute)
-               .datePickerStyle(CompactDatePickerStyle())
+           .datePickerStyle(GraphicalDatePickerStyle())
                .environment(\.locale, Locale(identifier: "en_US_POSIX"))
 //               .labelsHidden()
        }
     
-    @State private var num = 1;
+    @State private var onSliderEdit = false
+    @State private var num :Double = 1;
     var body: some View {
-        VStack(alignment:.leading){
-            
-            Text("Book a Table")
-                .font(.title)
-                .bold()
-            
-            // limits the date, to tomorrow ~ 1 month after
-            
-            DatePicker("Selected Date:", selection : $selectedDate, in: date, displayedComponents: .date)
-            
-            getTime
-            
-            Stepper("Group size: \(num)", onIncrement: {
-                if(num < 10){
-                    num += 1
+        NavigationStack{
+            VStack(alignment:.leading){
+                List{
+                    if(reservations.count > 0){
+                        Section(header: Text("Your reservations")
+                            .font(.title)
+                            .bold()
+                            .underline()
+                            .foregroundStyle(.black)
+                        ){
+                            ForEach(reservations) { reservation in
+                                Text(dateFormatter.string(from: reservation.reservationDateTime))
+                                Label("\(reservation.numOfPeople) ", systemImage: "person.2.fill")
+                            }
+                        }
+                    }
+//                    if(showBookTable){
+                        Section(header: Text("Book a Table")
+                            .font(.title)
+                            .bold()
+                            .underline()
+                            .foregroundStyle(.black)
+                        ){
+                            
+                             
+                            // limits the date, to tomorrow ~ 1 month after
+                            DatePicker("Selected Date", selection : $selectedDate, in: date, displayedComponents: .date)
+//                                .padding()
+                            
+                            getTime
+                            
+                            
+                            VStack{
+                                Text("Group size: \(String(format: "%.f", num))")
+                                Slider(
+                                    value: $num,
+                                    in: 1...10,
+                                    step: 1
+                                ) {
+                                    Text("Speed")
+                                } minimumValueLabel: {
+                                    Text("1")
+                                } maximumValueLabel: {
+                                    Text("10")
+                                } onEditingChanged: { editing in
+                                    onSliderEdit = editing
+                                    print(onSliderEdit)
+                                }
+                            }
+                            
+                            Button{
+                                print(dateFormatter.string(from: selectedDate))
+                                showingConfirmation = true
+                                //                setReservation()
+                            }label:{
+                                Text("Confirm")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .buttonStyle(.borderedProminent)
+                            .sheet(isPresented: $showingConfirmation){
+                             
+                                VStack{
+                                    Text("You've booked a reservation on \(dateFormatter.string(from:selectedDate)) for a")
+                                    Text("By creating a reservation, you've agreed to our TOS.")
+                                    
+                                    Button{
+                                        
+                                    }label:{
+                                        Text("Confirm booking")
+                                    }
+                                }
+                                    .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
+                                    .presentationDragIndicator(.visible)
+                            }
+//                            .confirmationDialog("Change background", isPresented: $showingConfirmation) {
+//                                Button("Confirm"){}
+//                                
+//                            } message:{
+//                                Text("You are coming on \(dateFormatter.string(from: selectedDate)) with total of \(num) ")
+//                            }
+                            
+                        }
+//                    }
                 }
-            }, onDecrement: {
-                if(num > 1){
-                    num -= 1
-                }
-            })
-            
-            Button{
-                print(dateFormatter.string(from: selectedDate))
-                print(dateFormatter.string(from: selectedDate))
-                setReservation()
-            }label:{
-                Label("Confirm", systemImage: "paperplane.circle.fill")
             }
-            .frame(maxWidth: .infinity)
-            .buttonStyle(.borderedProminent)
-            
+            .toolbar{
+                if(!showBookTable){
+                    Button{
+                        showBookTable = true
+                    }label:{
+                        Label("", systemImage:"plus")
+                    }
+                }
+            }
             Spacer()
         }
         .onAppear(perform:{
             UIDatePicker.appearance().minuteInterval = 15
+            onlyDateFormatter.dateFormat = "yyyy/MM/dd"
+            onlyDateFormatter.timeZone = TimeZone.current
+             
+            onlyTimeFormatter.dateFormat = "HH:mm:ss"
+            onlyTimeFormatter.timeZone = TimeZone.current  
+            
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//            let dateFormatter = DateFormatter()
             dateFormatter.timeZone = TimeZone.current  // Set to the device's current timezone
-//            dateFormatter.dateStyle = .medium
-//            dateFormatter.timeStyle = .medium
+            print("CALLED")
             getReservations()
         })
-        .padding()
         
         // by right, the timepicker should be given certain timing after getting the 'available' reservation
     }
+    @State private var showBookTable = false
+    @State private var reservations: [Reservation] = []
+    @State private var showingConfirmation = false
+    
     func getReservations(){
-        let request = tokenManager.wrappedRequest(sendReq: "/api/reservation/")
+        var request = tokenManager.wrappedRequest(sendReq: "/api/reservation/")
+        request.httpMethod = "GET"
         URLSession.shared.dataTask(with: request) { data, response, error in
-            
+             
             guard let httpResponse = response as? HTTPURLResponse,
             httpResponse.statusCode == 200 else {
                 return
             }
-          
+            
             if let data = data {
-                
                 do{
                     let decodedResponse = try JSONDecoder().decode([Reservation].self, from: data)
+                     
                     DispatchQueue.main.async{
-                        print(decodedResponse)
+                        reservations = decodedResponse
+                            .sorted(by: {$0.reservationDateTime < $1.reservationDateTime})
+                          
+                        print(reservations.count)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            showBookTable = reservations.count == 0
+                            // this should mean, automatically display the 'Create a Reservation' portion when there's 0 reservations
+                        }
                     }
                 } catch {
                     print("Failed to decode JSON: \(error.localizedDescription)")
@@ -116,14 +195,14 @@ struct ReservationView: View {
             }
             print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
         }.resume()
-    }
-    //        fields = ['user', 'reservationDateTime', 'status', 'numOfPeople']
+    } 
     
     func setReservation(){
         
         var request = tokenManager.wrappedRequest(sendReq: "/api/reservation/")
           
-        let json: [String: Any] = ["reservationDateTime": dateFormatter.string(from: selectedDate)]
+        let json: [String: Any] = ["reservationDateTime": dateFormatter.string(from: selectedDate),
+                                   "numOfPeople": num]
 
         let jsonData = try? JSONSerialization.data(withJSONObject: json)
 
@@ -134,6 +213,7 @@ struct ReservationView: View {
             
             guard let httpResponse = response as? HTTPURLResponse,
             httpResponse.statusCode == 200 else {
+              
                 return
             }
             if let data = data {
