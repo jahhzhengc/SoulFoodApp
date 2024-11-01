@@ -58,7 +58,7 @@ struct ProfilePage: View {
                 if (currentEnum == .birthday){
                     
                     SetBirthdayPage()
-                        .presentationDetents([.medium]) // Allows the sheet to be scrollable or full screen
+                        .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
                         .presentationDragIndicator(.visible)
                 }
             }
