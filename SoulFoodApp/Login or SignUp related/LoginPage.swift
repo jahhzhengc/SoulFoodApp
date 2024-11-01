@@ -15,7 +15,7 @@ struct LoginPage: View {
     
     @State private var errorMsg: Bool = false
     @ObservedObject private var tokenManager = TokenManager.shared
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var isPresented: Bool
     
     @State private var loggingIn: Bool = false
     
@@ -108,7 +108,7 @@ struct LoginPage: View {
             password = ""
             if(tokenManager.loggedIn()){
                 print("Already logged in")
-                self.presentationMode.wrappedValue.dismiss()
+                isPresented = false
             }
         }
         
@@ -124,6 +124,7 @@ struct LoginPage: View {
     func logIn(){
           
         var request = tokenManager.wrappedRequest(sendReq: "/auth/token/login/")
+        
         request.httpMethod = "POST"
         
         let json: [String: String] = ["username": username, "password" : password];
@@ -150,7 +151,8 @@ struct LoginPage: View {
                             tokenManager.saveToken(json.auth_token)
                             
                             loggingIn = false
-                            self.presentationMode.wrappedValue.dismiss()
+                            
+                            isPresented = false
                             print("HERE" ,json.auth_token!)
                         } catch {
                             loginError()
@@ -170,6 +172,6 @@ struct LoginPage: View {
 }
 
 
-#Preview {
-    LoginPage()
-}
+//#Preview {
+//    LoginPage(isPresented: <#Binding<Bool>#>)
+//}

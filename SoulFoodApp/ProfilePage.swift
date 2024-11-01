@@ -11,9 +11,9 @@ struct ProfilePage: View {
     @State private var showSheet = false
     
     enum SheetEnum: String {
-        case birthday, language, login
+        case birthday, language, login, address
     };
-    @State private var currentEnum: SheetEnum = .login
+    @State private var currentEnum: SheetEnum? = .login
     
     @ObservedObject var tokenManager = TokenManager.shared
      
@@ -28,10 +28,16 @@ struct ProfilePage: View {
                     Text("Favourites") // ideally all the favourite recipes?
 //                    Text("Language") // ideally integrate localisation
                     Button("Set my birthday"){
-                        showSheet = true
                         currentEnum = .birthday
+                        showSheet = true
                         print("IN")
                     }
+                    
+                    Button("Set my Address"){
+                        currentEnum = .address
+                        showSheet = true
+                    }
+                    
                     Text("Food reviews") // ideally they're allowed to drop feedback for ordered food
                     Text("Saved places") // ideally all the places thats stored
                 }
@@ -51,20 +57,20 @@ struct ProfilePage: View {
                 }
             }
             .listStyle(.grouped)
-            
-            
-            .sheet(isPresented: $showSheet) {
-//                print(currentEnum)
+            .sheet(isPresented: isSheetPresented) {
                 if (currentEnum == .birthday){
                     
                     SetBirthdayPage()
                         .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
                         .presentationDragIndicator(.visible)
                 }
+                else if (currentEnum == .address){
+                    SetAddressPage()
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
+                }
             }
-            .onChange(of: currentEnum){ 
-                print(currentEnum)
-            }
+           
         }else{
              
             List{
@@ -105,13 +111,11 @@ struct ProfilePage: View {
             .listStyle(.inset)
             
             .sheet(isPresented: $showSheet) {
-                if(currentEnum == .login){
-                    LoginPage()
+//                if(currentEnum == .login){
+                    LoginPage(isPresented: $showSheet)
                         .presentationDetents([.medium, .large]) // Allows the sheet to be scrollable or full screen
                         .presentationDragIndicator(.visible)
-                } else if (currentEnum == .birthday){
-                    Text("Set birthday")
-                }
+//                }
             }
         }
     }
@@ -125,6 +129,17 @@ struct ProfilePage: View {
             }
         }.resume()
     }
+    
+    private var isSheetPresented: Binding<Bool> {
+        Binding(
+            get: { showSheet && currentEnum != nil },
+            set: { newValue in
+                showSheet = newValue
+//                print("\(newValue) is set" ) 
+            }
+        )
+    }
+
 }
 
 #Preview {

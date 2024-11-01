@@ -96,6 +96,20 @@ struct ReservationView: View {
                                 }
                             }
                             
+                            Group{
+                                Text("By proceeding, you agree to our ") +
+                                Text("Terms of Use")
+                                    .underline()
+                                    .foregroundStyle(.blue) +
+                                Text(" and confirm you have read our ") +
+                                Text("Privacy and Cookie Statement")
+                                    .underline()
+                                    .foregroundStyle(.blue) +
+                                Text(".")
+                            }
+                            .font(.caption)
+                            .padding(.vertical)
+                            
                             Button{
                                 print(dateFormatter.string(from: selectedDate))
                                 showingConfirmation = true

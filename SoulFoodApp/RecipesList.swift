@@ -201,7 +201,7 @@ struct RecipesList: View {
                       self.categories = Array(Set(decodedResponse.map { $0.category }))
                           .sorted(by: {  ($0.display_order_mobile, $0.name) < ($1.display_order_mobile, $1.name) })
                       
-                      loadFavourites()
+//                      loadFavourites()
                       self.loaded = true
                   }
               } catch {
